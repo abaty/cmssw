@@ -105,6 +105,7 @@ class SiStripBaselineAnalyzer : public edm::EDAnalyzer {
   
 	  TH1F* h1BadAPVperEvent_;
 	  
+	  TH1F* h1RawDigis_;
 	  TH1F* h1ProcessedRawDigis_;
 	  TH1F* h1Baseline_;
 	  TH1F* h1Clusters_;
@@ -227,12 +228,11 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
    char evs[20];
    char runs[20];    
    
-
+   TFileDirectory sdRawDigis_= fs_->mkdir("RawDigis");
    TFileDirectory sdProcessedRawDigis_= fs_->mkdir("ProcessedRawDigis");
    TFileDirectory sdBaseline_= fs_->mkdir("Baseline");
    TFileDirectory sdBaselinePoints_= fs_->mkdir("BaselinePoints");
    TFileDirectory sdClusters_= fs_->mkdir("Clusters");
-   
 
    edm::DetSetVector<SiStripProcessedRawDigi>::const_iterator itDSBaseline;
    if(plotBaseline_) itDSBaseline = moduleBaseline->begin();
@@ -260,7 +260,6 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
       edm::EventNumber_t const event = e.id().event();
       //std::cout << "processing module N: " << actualModule_<< " detId: " << detId << " event: "<< event << std::endl; 
 	 
-
 	  
       edm::DetSet<SiStripRawDigi>::const_iterator itRaw = itRawDigis->begin(); 
       bool restAPV[6] = {0,0,0,0,0,0};
@@ -269,8 +268,7 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
       for(;itRaw != itRawDigis->end(); ++itRaw, ++strip){
 	    float adc = itRaw->adc();
 	    totADC+= adc;
-	    if(strip%127 ==0){
-      		//std::cout << "totADC " << totADC << std::endl;
+	    if(strip%128 ==127){
 	      int APV = strip/128;
 	      if(totADC!= 0){
       	    	restAPV[APV] = true;
@@ -294,7 +292,14 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
       sprintf(runs,"%u", run);
       char* dHistoName = Form("Id:%s_run:%s_ev:%s",detIds, runs, evs);
       h1ProcessedRawDigis_ = sdProcessedRawDigis_.make<TH1F>(dHistoName,dHistoName, bins, minx, maxx); 
-      
+      h1RawDigis_ = sdRawDigis_.make<TH1F>(dHistoName,dHistoName, bins, minx, maxx);     
+
+      edm::DetSet<SiStripRawDigi>::const_iterator itRaw2 = itRawDigis->begin(); 
+      int strip2 =0;
+      for(;itRaw2 != itRawDigis->end(); ++itRaw2, ++strip2){
+            h1RawDigis_->Fill(strip2,itRaw2->adc());
+      }
+ 
       if(plotBaseline_){
 	h1Baseline_ = sdBaseline_.make<TH1F>(dHistoName,dHistoName, bins, minx, maxx); 
         h1Baseline_->SetXTitle("strip#");
@@ -324,6 +329,12 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
       h1ProcessedRawDigis_->SetMinimum(-300.);
       h1ProcessedRawDigis_->SetLineWidth(2);
       
+      h1RawDigis_->SetXTitle("strip#");  
+      h1RawDigis_->SetYTitle("ADC");
+      h1RawDigis_->SetMaximum(1024.);
+      h1RawDigis_->SetMinimum(-300.);
+      h1RawDigis_->SetLineWidth(2);
+      
       std::vector<int16_t> ProcessedRawDigis(itRawDigis->size());
       subtractorPed_->subtract( *itRawDigis, ProcessedRawDigis);
 
@@ -331,13 +342,14 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
       if(plotBaseline_) itBaseline = itDSBaseline->begin(); 
       std::vector<int16_t>::const_iterator itProcessedRawDigis;
 	  	  
-      strip =0;      
-      for(itProcessedRawDigis = ProcessedRawDigis.begin();itProcessedRawDigis != ProcessedRawDigis.end(); ++itProcessedRawDigis){
-       	if(restAPV[strip/128]){
-	  float adc = *itProcessedRawDigis;       
+      if(minAPVRes==7) minAPVRes=0;
+      strip = minAPVRes * 128;      
+      for(itProcessedRawDigis = ProcessedRawDigis.begin();itProcessedRawDigis != ProcessedRawDigis.end(); ++itProcessedRawDigis){ 
+	if(restAPV[strip/128]){
+	  float adc = *(itProcessedRawDigis+minAPVRes*128);
 	  h1ProcessedRawDigis_->Fill(strip, adc);
 	  if(plotBaseline_){
-	    h1Baseline_->Fill(strip, itBaseline->adc()); 
+	    h1Baseline_->Fill(strip, (itBaseline+minAPVRes*128)->adc()); 
 	    ++itBaseline;
 	  }
 	 }

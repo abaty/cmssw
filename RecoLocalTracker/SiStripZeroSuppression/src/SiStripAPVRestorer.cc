@@ -326,6 +326,10 @@ void SiStripAPVRestorer::BaselineFollowerRestore(const uint16_t& APVn, const uin
     DigiMap  smoothedpoints;
     std::vector<int16_t> singleAPVdigi;
     singleAPVdigi.clear(); 
+    
+
+//edits here
+    //int16_t APV_Bitmask = 32764;
     for(int16_t strip = (APVn-firstAPV)*128; strip < (APVn-firstAPV+1)*128; ++strip) singleAPVdigi.push_back(digis[strip]); 
     this->FlatRegionsFinder(singleAPVdigi,smoothedpoints, APVn);
     this->BaselineFollower(smoothedpoints, baseline, median);		

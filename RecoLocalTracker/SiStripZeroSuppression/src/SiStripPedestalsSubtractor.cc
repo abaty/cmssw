@@ -32,8 +32,8 @@ subtract_(const uint32_t& id, const uint16_t& firstStrip, const input_t& input, 
       
       *outDigi = ( *ped > 895 )        
 	? eval(*inDigi) - *ped + 1024
-	: eval(*inDigi) - *ped;
-      
+	: eval(*inDigi) - *ped; 
+
       if(fedmode_ && *outDigi < 0) //FED bottoms out at 0
 	*outDigi=0;
       
