@@ -59,6 +59,7 @@
 #include "TMath.h"
 #include "TCanvas.h"
 #include "TH1F.h"
+#include "TH1I.h"
 #include "TH2F.h"
 #include "TProfile.h"
 #include "TList.h"
@@ -105,11 +106,18 @@ class SiStripBaselineAnalyzer : public edm::EDAnalyzer {
   
 	  TH1F* h1BadAPVperEvent_;
 	  
+          TH1F* h1RawDigis_;
 	  TH1F* h1ProcessedRawDigis_;
 	  TH1F* h1Baseline_;
 	  TH1F* h1Clusters_;
           TH1F* h1APVCM_;
           TH1F* h1Pedestals_;	  
+
+          TH1I* h1ClusterMult_; 
+          TH1I* h1ClusterCharge_;
+          TH1I* h1ClusterWidth_; 
+          TH1I* h1ClusterMean_; 
+          TH1I* h1ClusterSigma_; 
 	  
 	  TCanvas* Canvas_;
 	  std::vector<TH1F> vProcessedRawDigiHisto_;
@@ -143,7 +151,7 @@ SiStripBaselineAnalyzer::SiStripBaselineAnalyzer(const edm::ParameterSet& conf){
   h1BadAPVperEvent_->SetLineWidth(2);
   h1BadAPVperEvent_->SetLineStyle(2);
 
-  h1APVCM_ = fs_->make<TH1F>("APV CM","APV CM", 2048, -1023.5, 1023.5);
+  h1APVCM_ = fs_->make<TH1F>("APVCM","APVCM", 2048, -1023.5, 1023.5);
   h1APVCM_->SetXTitle("APV CM [adc]");
   h1APVCM_->SetYTitle("Entries");
   h1APVCM_->SetLineWidth(2);
@@ -154,9 +162,12 @@ SiStripBaselineAnalyzer::SiStripBaselineAnalyzer(const edm::ParameterSet& conf){
   h1Pedestals_->SetYTitle("Entries");
   h1Pedestals_->SetLineWidth(2);
   h1Pedestals_->SetLineStyle(2);
-
   
- 
+  h1ClusterMult_ = fs_->make<TH1I>("ClusterMult","Cluster Multiplicity;nClusters;nEvents", 100, 0, 500000);
+  h1ClusterCharge_ = fs_->make<TH1I>("ClusterCharge","Cluster Charge;Cluster Charge;nCluster", 100, 0, 5000);
+  h1ClusterWidth_ = fs_->make<TH1I>("ClusterWidth","Cluster Width;Cluster Width;nCluster", 128, 0, 128);
+  h1ClusterMean_ = fs_->make<TH1I>("ClusterMean","Cluster Mean;Cluster Mean;nCluster", 128, 0, 128);
+  h1ClusterSigma_ = fs_->make<TH1I>("ClusterSigma","Cluster Sigma;Cluster Sigma;nCluster", 60, 0, 50);
 }
 
 
@@ -170,6 +181,7 @@ SiStripBaselineAnalyzer::~SiStripBaselineAnalyzer()
 void
 SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
 {
+   bool ClusterDists = false;
    using namespace edm;
    if(plotPedestals_&&actualModule_ ==0){
       uint32_t p_cache_id = es.get<SiStripPedestalsRcd>().cacheIdentifier();
@@ -185,7 +197,7 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
       for(uint32_t i=0; i < detIdV.size(); ++i){
         pedestals.clear();
         SiStripPedestals::Range pedestalsRange = pedestalsHandle->getRange(detIdV[i]);
-        pedestals.resize((pedestalsRange.second- pedestalsRange.first)*8/10);
+        pedestals.resize((pedestalsRange.second- pedestalsRange.first));
 	pedestalsHandle->allPeds(pedestals, pedestalsRange);
 	for(uint32_t it=0; it < pedestals.size(); ++it) h1Pedestals_->Fill(pedestals[it]);
       }
@@ -202,11 +214,8 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
        for(;itCM != itCMDetSetV->end(); ++itCM) h1APVCM_->Fill(itCM->adc());
      }
    }
-   
    if(!plotRawDigi_) return;
-   subtractorPed_->init(es);
-   
-   
+   subtractorPed_->init(es); 
  
    edm::Handle< edm::DetSetVector<SiStripRawDigi> > moduleRawDigi;
    e.getByLabel(srcProcessedRawDigi_,moduleRawDigi);
@@ -214,8 +223,9 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
    edm::Handle<edm::DetSetVector<SiStripProcessedRawDigi> > moduleBaseline;
    if(plotBaseline_) e.getByLabel(srcBaseline_, moduleBaseline); 
 
-   edm::Handle<edm::DetSetVector<SiStripDigi> > moduleBaselinePoints;
-   if(plotBaselinePoints_) e.getByLabel(srcBaseline_, moduleBaselinePoints); 
+//here (2 lines)
+   edm::Handle<edm::DetSetVector<SiStripProcessedRawDigi> > moduleBaselinePoints;
+   if(plotBaselinePoints_) e.getByLabel(srcBaselinePoints_, moduleBaselinePoints); 
    
    edm::Handle<edmNew::DetSetVector<SiStripCluster> > clusters;
    if(plotClusters_){
@@ -229,17 +239,18 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
    
 
    TFileDirectory sdProcessedRawDigis_= fs_->mkdir("ProcessedRawDigis");
+   TFileDirectory sdRawDigis_= fs_->mkdir("RawDigis");
    TFileDirectory sdBaseline_= fs_->mkdir("Baseline");
    TFileDirectory sdBaselinePoints_= fs_->mkdir("BaselinePoints");
    TFileDirectory sdClusters_= fs_->mkdir("Clusters");
    
 
+//here
    edm::DetSetVector<SiStripProcessedRawDigi>::const_iterator itDSBaseline;
    if(plotBaseline_) itDSBaseline = moduleBaseline->begin();
    edm::DetSetVector<SiStripRawDigi>::const_iterator itRawDigis = moduleRawDigi->begin();
    
    uint32_t NBabAPVs = moduleRawDigi->size();     
-   std::cout<< "Number of module with HIP in this event: " << NBabAPVs << std::endl;
    h1BadAPVperEvent_->Fill(NBabAPVs);
    
    for (; itRawDigis != moduleRawDigi->end(); ++itRawDigis) {
@@ -247,10 +258,11 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
       uint32_t detId = itRawDigis->id;
 	  
       if(plotBaseline_){
-	//std::cout << "bas id: " << itDSBaseline->id << " raw id: " << detId << std::endl;
+//	std::cout << "bas id: " << itDSBaseline->id << " raw id: " << detId << std::endl;
 	if(itDSBaseline->id != detId){
-		std::cout << "Collections out of Synch. Something of fishy is going on ;-)" << std::endl;
-		return;
+		itDSBaseline = moduleBaseline->find(detId);
+                if(itDSBaseline->id != detId){ if(plotBaseline_)itDSBaseline++; continue;}
+//                else std::cout << "Resynched..." << std::endl;
 	}	  
       }
       
@@ -269,7 +281,7 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
       for(;itRaw != itRawDigis->end(); ++itRaw, ++strip){
 	    float adc = itRaw->adc();
 	    totADC+= adc;
-	    if(strip%127 ==0){
+	    if(strip%128 ==127){
       		//std::cout << "totADC " << totADC << std::endl;
 	      int APV = strip/128;
 	      if(totADC!= 0){
@@ -289,11 +301,19 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
       	bins = maxx-minx;
       }
       
+
       sprintf(detIds,"%ul", detId);
       sprintf(evs,"%llu", event);
       sprintf(runs,"%u", run);
-      char* dHistoName = Form("Id:%s_run:%s_ev:%s",detIds, runs, evs);
+      char* dHistoName = Form("Id%s_run%s_ev%s",detIds, runs, evs);
       h1ProcessedRawDigis_ = sdProcessedRawDigis_.make<TH1F>(dHistoName,dHistoName, bins, minx, maxx); 
+      h1RawDigis_ = sdRawDigis_.make<TH1F>(dHistoName,dHistoName, bins, minx, maxx); 
+
+      edm::DetSet<SiStripRawDigi>::const_iterator itRaw2 = itRawDigis->begin(); 
+      int strip2=0;
+      for(; itRaw2 != itRawDigis->end(); ++itRaw2, ++strip2){
+            h1RawDigis_->Fill(strip2,itRaw2->adc());
+      }
       
       if(plotBaseline_){
 	h1Baseline_ = sdBaseline_.make<TH1F>(dHistoName,dHistoName, bins, minx, maxx); 
@@ -323,18 +343,24 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
       h1ProcessedRawDigis_->SetMaximum(1024.);
       h1ProcessedRawDigis_->SetMinimum(-300.);
       h1ProcessedRawDigis_->SetLineWidth(2);
+      h1RawDigis_->SetXTitle("strip#");  
+      h1RawDigis_->SetYTitle("ADC");
+      h1RawDigis_->SetMaximum(1024.);
+      h1RawDigis_->SetMinimum(-300.);
+      h1RawDigis_->SetLineWidth(2);
       
       std::vector<int16_t> ProcessedRawDigis(itRawDigis->size());
       subtractorPed_->subtract( *itRawDigis, ProcessedRawDigis);
 
       edm::DetSet<SiStripProcessedRawDigi>::const_iterator  itBaseline;
       if(plotBaseline_) itBaseline = itDSBaseline->begin(); 
+      
       std::vector<int16_t>::const_iterator itProcessedRawDigis;
-	  	  
-      strip =0;      
-      for(itProcessedRawDigis = ProcessedRawDigis.begin();itProcessedRawDigis != ProcessedRawDigis.end(); ++itProcessedRawDigis){
+     
+      strip =0;    
+      for(itProcessedRawDigis = ProcessedRawDigis.begin();itProcessedRawDigis != ProcessedRawDigis.end(); itProcessedRawDigis++){ 
        	if(restAPV[strip/128]){
-	  float adc = *itProcessedRawDigis;       
+	  float adc = *itProcessedRawDigis;     
 	  h1ProcessedRawDigis_->Fill(strip, adc);
 	  if(plotBaseline_){
 	    h1Baseline_->Fill(strip, itBaseline->adc()); 
@@ -343,9 +369,9 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
 	 }
 	++strip;
        }	  
-       
       if(plotBaseline_) ++itDSBaseline; 
       if(plotClusters_){
+          int nclust = 0;
 	  edmNew::DetSetVector<SiStripCluster>::const_iterator itClusters = clusters->begin();
 	  for ( ; itClusters != clusters->end(); ++itClusters ){
 		for ( edmNew::DetSet<SiStripCluster>::const_iterator clus =	itClusters->begin(); clus != itClusters->end(); ++clus){
@@ -357,9 +383,37 @@ SiStripBaselineAnalyzer::analyze(const edm::Event& e, const edm::EventSetup& es)
 		      h1Clusters_->Fill(firststrip+strip, *itAmpl);
 		      ++strip;
 		    }
-		  }              
+		  }
+                  
+                  //cluster plots from here on
+                   
+                  if(ClusterDists == false){
+		    nclust++;
+
+     		    int strip2=0;
+                    double charge = 0;
+                    double mean = 0;
+                    double sigma = 0;
+		    for( auto itAmpl = clus->amplitudes().begin(); itAmpl != clus->amplitudes().end(); ++itAmpl){
+                      charge += *itAmpl;
+		      ++strip2;
+                      mean += strip2*(*itAmpl);
+		      sigma += strip2*strip2*(*itAmpl);
+		    }
+                    h1ClusterCharge_->Fill(charge);
+                    h1ClusterWidth_->Fill(strip2);
+                    mean = mean/charge;
+                    h1ClusterMean_->Fill(mean);
+                    sigma = TMath::Power((sigma/charge-mean*mean),0.5);
+                    h1ClusterSigma_->Fill(sigma);
+                  }              
 		}
 	  }
+        if(ClusterDists==false)
+        {
+          h1ClusterMult_->Fill(nclust); 
+          ClusterDists = true;
+        }
       }
    }		
 
