@@ -20,14 +20,15 @@ hiMixedTripletClusters = cms.EDProducer("HITrackClusterRemover",
                                         )
 
 
-                                        
-
-
 # SEEDING LAYERS
 from RecoLocalTracker.SiStripClusterizer.SiStripClusterChargeCut_cfi import *
 hiMixedTripletSeedLayersA = cms.EDProducer("SeedingLayersEDProducer",
-                                             layerList = cms.vstring('FPix1_pos+FPix2_pos+TEC1_pos', 'FPix1_neg+FPix2_neg+TEC1_neg'),
-                                                                     #'FPix2_pos+TEC2_pos+TEC3_pos', 'FPix2_neg+TEC2_neg+TEC3_neg'),
+    #layerList = cms.vstring('FPix1_pos+FPix2_pos+TEC1_pos', 'FPix1_neg+FPix2_neg+TEC1_neg'),
+                            #'FPix2_pos+TEC2_pos+TEC3_pos', 'FPix2_neg+TEC2_neg+TEC3_neg'),
+    layerList = cms.vstring(
+        'BPix2+FPix1_pos+FPix2_pos', 'BPix2+FPix1_neg+FPix2_neg',
+        'FPix2_pos+FPix3_pos+TEC1_pos', 'FPix2_neg+FPix3_neg+TEC1_neg'
+    ),
                                    BPix = cms.PSet(
     TTRHBuilder = cms.string('TTRHBuilderWithoutAngle4MixedTriplets'),
     HitProducer = cms.string('siPixelRecHits'),
@@ -44,7 +45,7 @@ hiMixedTripletSeedLayersA = cms.EDProducer("SeedingLayersEDProducer",
     TTRHBuilder = cms.string('WithTrackAngle'),
     clusterChargeCut = cms.PSet(refToPSet_ = cms.string('SiStripClusterChargeCutNone')),
     minRing = cms.int32(1),
-    maxRing = cms.int32(1),
+    maxRing = cms.int32(2),
     skipClusters = cms.InputTag('hiMixedTripletClusters')
     )
                                    )
@@ -58,10 +59,17 @@ hiMixedTripletSeedsA = RecoTracker.TkSeedGenerator.GlobalSeedsFromTriplets_cff.g
 hiMixedTripletSeedsA.OrderedHitsFactoryPSet.SeedingLayers = 'hiMixedTripletSeedLayersA'
 hiMixedTripletSeedsA.OrderedHitsFactoryPSet.GeneratorPSet = cms.PSet(PixelTripletLargeTipGenerator)
 hiMixedTripletSeedsA.SeedCreatorPSet.ComponentName = 'SeedFromConsecutiveHitsTripletOnlyCreator'
-hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.ptMin = 4.0
-hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.originRadius = 0.005
+#hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.ptMin = 1.0
+#hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.originRadius = 0.8
 #hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.nSigmaZ = 4.0
-hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 10.0
+#hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 5
+hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.ptMin = 0.4
+hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.originRadius = 1.5
+hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 15
+hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.originRScaling4BigEvts = cms.bool(True)
+hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.minOriginR = 0
+hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.scalingStartNPix = 15000
+hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.scalingEndNPix = 25000
 
 hiMixedTripletSeedsA.OrderedHitsFactoryPSet.GeneratorPSet.maxElement = 5000000
 hiMixedTripletSeedsA.ClusterCheckPSet.MaxNumberOfPixelClusters = 5000000
@@ -76,8 +84,9 @@ hiMixedTripletSeedLayersB = cms.EDProducer("SeedingLayersEDProducer",
     #'BPix1+BPix2+TIB2',    
     #'BPix1+BPix3+TIB1',
     #'BPix1+BPix3+TIB2',    
-    'BPix2+BPix3+TIB1',
-    'BPix2+BPix3+TIB2'),
+    'BPix3+BPix4+TIB1',
+    #'BPix4+BPix4+TIB2'
+    ),
                                    BPix = cms.PSet(
     TTRHBuilder = cms.string('TTRHBuilderWithoutAngle4MixedTriplets'),
     HitProducer = cms.string('siPixelRecHits'),
@@ -86,6 +95,7 @@ hiMixedTripletSeedLayersB = cms.EDProducer("SeedingLayersEDProducer",
                                    TIB = cms.PSet(
     matchedRecHits = cms.InputTag("siStripMatchedRecHits","matchedRecHit"),
     TTRHBuilder = cms.string('WithTrackAngle'),
+    clusterChargeCut = cms.PSet(refToPSet_ = cms.string('SiStripClusterChargeCutNone')),
     skipClusters = cms.InputTag('hiMixedTripletClusters')
     )
                                    )
@@ -99,10 +109,17 @@ hiMixedTripletSeedsB = RecoTracker.TkSeedGenerator.GlobalSeedsFromTriplets_cff.g
 hiMixedTripletSeedsB.OrderedHitsFactoryPSet.SeedingLayers = 'hiMixedTripletSeedLayersB'
 hiMixedTripletSeedsB.OrderedHitsFactoryPSet.GeneratorPSet = cms.PSet(PixelTripletLargeTipGenerator)
 hiMixedTripletSeedsB.SeedCreatorPSet.ComponentName = 'SeedFromConsecutiveHitsTripletOnlyCreator'
-hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.ptMin = 4.0
-hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.originRadius = 0.005
+#hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.ptMin = 1.0
+#hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.originRadius = 0.7
 #hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.nSigmaZ = 4.0
-hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 10.0
+#hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 5
+hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.ptMin = 0.4
+hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.originRadius = 1.0
+hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 15
+hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.originRScaling4BigEvts = cms.bool(True)
+hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.minOriginR = 0
+hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.scalingStartNPix = 15000
+hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.scalingEndNPix = 25000
 
 hiMixedTripletSeedsB.OrderedHitsFactoryPSet.GeneratorPSet.maxElement = 5000000
 hiMixedTripletSeedsB.ClusterCheckPSet.MaxNumberOfPixelClusters = 5000000
@@ -118,21 +135,21 @@ hiMixedTripletSeeds.seedCollections = cms.VInputTag(
 # QUALITY CUTS DURING TRACK BUILDING
 import TrackingTools.TrajectoryFiltering.TrajectoryFilter_cff
 hiMixedTripletTrajectoryFilter = TrackingTools.TrajectoryFiltering.TrajectoryFilter_cff.CkfBaseTrajectoryFilter_block.clone(
-    maxLostHits = 0,
-    minimumNumberOfHits = 6,
-    minPt = 1.0
+    #maxLostHits = 0,
+    minimumNumberOfHits = 3,
+    minPt = 0.1
     )
 
 # Propagator taking into account momentum uncertainty in multiple scattering calculation.
 import TrackingTools.MaterialEffects.MaterialPropagator_cfi
 hiMixedTripletPropagator = TrackingTools.MaterialEffects.MaterialPropagator_cfi.MaterialPropagator.clone(
     ComponentName = 'hiMixedTripletPropagator',
-    ptMin = 1.0
+    ptMin = 0.1
     )
 import TrackingTools.MaterialEffects.OppositeMaterialPropagator_cfi
 hiMixedTripletPropagatorOpposite = TrackingTools.MaterialEffects.OppositeMaterialPropagator_cfi.OppositeMaterialPropagator.clone(
     ComponentName = 'hiMixedTripletPropagatorOpposite',
-    ptMin = 1.0
+    ptMin = 0.1
     )
 
 import TrackingTools.KalmanUpdators.Chi2MeasurementEstimator_cfi
@@ -149,30 +166,35 @@ hiMixedTripletTrajectoryBuilder = RecoTracker.CkfPattern.GroupedCkfTrajectoryBui
     trajectoryFilter = cms.PSet(refToPSet_ = cms.string('hiMixedTripletTrajectoryFilter')),
     propagatorAlong = cms.string('hiMixedTripletPropagator'),
     propagatorOpposite = cms.string('hiMixedTripletPropagatorOpposite'),
-    clustersToSkip = cms.InputTag('hiMixedTripletClusters'),
     maxCand = 2,
-    estimator = cms.string('hiMixedTripletChi2Est')
+    estimator = cms.string('hiMixedTripletChi2Est'),
+    maxDPhiForLooperReconstruction = cms.double(2.0),
+    maxPtForLooperReconstruction = cms.double(0.7) 
     )
 
 # MAKING OF TRACK CANDIDATES
 import RecoTracker.CkfPattern.CkfTrackCandidates_cfi
 hiMixedTripletTrackCandidates = RecoTracker.CkfPattern.CkfTrackCandidates_cfi.ckfTrackCandidates.clone(
     src = cms.InputTag('hiMixedTripletSeeds'),
+    clustersToSkip = cms.InputTag('hiMixedTripletClusters'),
     TrajectoryBuilderPSet = cms.PSet(refToPSet_ = cms.string('hiMixedTripletTrajectoryBuilder')),
+    numHitsForSeedCleaner = cms.int32(50),
     doSeedingRegionRebuilding = True,
     useHitsSplitting = True
     )
+
 # TRACK FITTING
 import RecoTracker.TrackProducer.TrackProducer_cfi
-hiMixedTripletGlobalPrimTracks = RecoTracker.TrackProducer.TrackProducer_cfi.TrackProducer.clone(
+hiMixedTripletStepTracks = RecoTracker.TrackProducer.TrackProducer_cfi.TrackProducer.clone(
     AlgorithmName = cms.string('mixedTripletStep'),
-    src = 'hiMixedTripletTrackCandidates'
+    src = 'hiMixedTripletTrackCandidates',
+    Fitter = cms.string('FlexibleKFFittingSmoother')
     )
 
 # Final selection
 import RecoHI.HiTracking.hiMultiTrackSelector_cfi
 hiMixedTripletStepSelector = RecoHI.HiTracking.hiMultiTrackSelector_cfi.hiMultiTrackSelector.clone(
-    src='hiMixedTripletGlobalPrimTracks',
+    src='hiMixedTripletStepTracks',
     trackSelectors= cms.VPSet(
     RecoHI.HiTracking.hiMultiTrackSelector_cfi.hiLooseMTS.clone(
     name = 'hiMixedTripletStepLoose',
@@ -184,7 +206,7 @@ hiMixedTripletStepSelector = RecoHI.HiTracking.hiMultiTrackSelector_cfi.hiMultiT
     RecoHI.HiTracking.hiMultiTrackSelector_cfi.hiHighpurityMTS.clone(
     name = 'hiMixedTripletStep',
     preFilterName = 'hiMixedTripletStepTight',
-    min_nhits = 14
+    min_nhits = 8
     ),
     ) #end of vpset
     ) #end of clone
@@ -201,6 +223,6 @@ hiMixedTripletStep = cms.Sequence(
                           hiMixedTripletSeedsB*
                           hiMixedTripletSeeds*
                           hiMixedTripletTrackCandidates*
-                          hiMixedTripletGlobalPrimTracks*
+                          hiMixedTripletStepTracks*
                           hiMixedTripletStepSelector)
 

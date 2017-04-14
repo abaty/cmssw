@@ -58,7 +58,9 @@ public:
       theInvPtRange( invPtRange), thePhi(direction.barePhi()),
       thePtMin(1.f/std::max( std::abs(invPtRange.max()), std::abs(invPtRange.min()) )),
       theVertexRBound( originRBound),
-      theVertexZBound( originZBound) { }    
+      theVertexZBound( originZBound) {
+      //theVertexRBound = 0; 
+       }    
 
 
   /// the direction around which region is constructed 

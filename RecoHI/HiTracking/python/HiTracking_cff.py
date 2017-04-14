@@ -43,7 +43,8 @@ hiTracking_noRegitMu_wSplitting_Phase1 = cms.Sequence(
     *hiDetachedQuadStep#New iteration
     *hiDetachedTripletStep
     *hiLowPtTripletStep
-    *hiPixelPairStep #no CA seeding implemented
+    *hiMixedTripletStep
+    #*hiPixelPairStep #no CA seeding implemented
     )
 
 hiTracking = cms.Sequence(
