@@ -68,8 +68,8 @@ hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.originRadius = 1.5
 hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.originHalfLength = 15
 hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.originRScaling4BigEvts = cms.bool(True)
 hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.minOriginR = 0
-hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.scalingStartNPix = 15000
-hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.scalingEndNPix = 25000
+hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.scalingStartNPix = 20000
+hiMixedTripletSeedsA.RegionFactoryPSet.RegionPSet.scalingEndNPix = 35000
 
 hiMixedTripletSeedsA.OrderedHitsFactoryPSet.GeneratorPSet.maxElement = 5000000
 hiMixedTripletSeedsA.ClusterCheckPSet.MaxNumberOfPixelClusters = 5000000
@@ -118,8 +118,8 @@ hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.originRadius = 1.0
 hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.originHalfLength = 15
 hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.originRScaling4BigEvts = cms.bool(True)
 hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.minOriginR = 0
-hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.scalingStartNPix = 15000
-hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.scalingEndNPix = 25000
+hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.scalingStartNPix = 20000
+hiMixedTripletSeedsB.RegionFactoryPSet.RegionPSet.scalingEndNPix = 35000
 
 hiMixedTripletSeedsB.OrderedHitsFactoryPSet.GeneratorPSet.maxElement = 5000000
 hiMixedTripletSeedsB.ClusterCheckPSet.MaxNumberOfPixelClusters = 5000000
@@ -136,20 +136,20 @@ hiMixedTripletSeeds.seedCollections = cms.VInputTag(
 import TrackingTools.TrajectoryFiltering.TrajectoryFilter_cff
 hiMixedTripletTrajectoryFilter = TrackingTools.TrajectoryFiltering.TrajectoryFilter_cff.CkfBaseTrajectoryFilter_block.clone(
     #maxLostHits = 0,
-    minimumNumberOfHits = 3,
-    minPt = 0.1
+    minimumNumberOfHits = 4,
+    minPt = 0.3
     )
 
 # Propagator taking into account momentum uncertainty in multiple scattering calculation.
 import TrackingTools.MaterialEffects.MaterialPropagator_cfi
 hiMixedTripletPropagator = TrackingTools.MaterialEffects.MaterialPropagator_cfi.MaterialPropagator.clone(
     ComponentName = 'hiMixedTripletPropagator',
-    ptMin = 0.1
+    ptMin = 0.3
     )
 import TrackingTools.MaterialEffects.OppositeMaterialPropagator_cfi
 hiMixedTripletPropagatorOpposite = TrackingTools.MaterialEffects.OppositeMaterialPropagator_cfi.OppositeMaterialPropagator.clone(
     ComponentName = 'hiMixedTripletPropagatorOpposite',
-    ptMin = 0.1
+    ptMin = 0.3
     )
 
 import TrackingTools.KalmanUpdators.Chi2MeasurementEstimator_cfi
