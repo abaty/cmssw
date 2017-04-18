@@ -120,7 +120,7 @@ hiLowPtQuadStepPixelTracksFilter = hiFilter.clone(
     nSigmaTipMaxTolerance = 0,
     lipMax = 1.0,
     tipMax = 1.0,
-    ptMin = 0.4, #seeding region is 0.3
+    ptMin = 0.3, #seeding region is 0.3
 )
 hiLowPtQuadStepPixelTracks = cms.EDProducer("PixelTrackProducer",
 
@@ -215,20 +215,23 @@ hiLowPtQuadStepSelector = RecoHI.HiTracking.hiMultiTrackSelector_cfi.hiMultiTrac
     name = 'hiLowPtQuadStepLoose',
     applyAdaptedPVCuts = cms.bool(False),
     useMVA = cms.bool(False),
+    min_nhits = cms.uint32(4),
     ), #end of pset
     RecoHI.HiTracking.hiMultiTrackSelector_cfi.hiTightMTS.clone(
     name = 'hiLowPtQuadStepTight',
     preFilterName = 'hiLowPtQuadStepLoose',
     applyAdaptedPVCuts = cms.bool(False),
     useMVA = cms.bool(False),
-    minMVA = cms.double(-0.2)
+    minMVA = cms.double(-0.2),
+    min_nhits = cms.uint32(4),
     ),
     RecoHI.HiTracking.hiMultiTrackSelector_cfi.hiHighpurityMTS.clone(
     name = 'hiLowPtQuadStep',
     preFilterName = 'hiLowPtQuadStepTight',
     applyAdaptedPVCuts = cms.bool(False),
     useMVA = cms.bool(False),
-    minMVA = cms.double(-0.09)
+    minMVA = cms.double(-0.09),
+    min_nhits = cms.uint32(4),
     ),
     ) #end of vpset
     ) #end of clone

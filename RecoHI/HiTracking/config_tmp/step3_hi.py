@@ -27,15 +27,46 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(5)
+    input = cms.untracked.int32(4)
 )
 
 # Input source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
+#'/store/user/abaty/TrackingPhase1_MC/Hydjet_RAW_30100/Baty_2017Phase1TrackingGeom_Hydjet_GEN/Baty_2017Phase1TrackingGeom_Hydjet_RAW_30100/170316_165333/0000/PbPbstep2_DIGI2017_10.root',
+#'/store/user/abaty/TrackingPhase1_MC/Hydjet_RAW_30100/Baty_2017Phase1TrackingGeom_Hydjet_GEN/Baty_2017Phase1TrackingGeom_Hydjet_RAW_30100/170316_165333/0000/PbPbstep2_DIGI2017_11.root',
+#'/store/user/abaty/TrackingPhase1_MC/Hydjet_RAW_30100/Baty_2017Phase1TrackingGeom_Hydjet_GEN/Baty_2017Phase1TrackingGeom_Hydjet_RAW_30100/170316_165333/0000/PbPbstep2_DIGI2017_12.root',
+#'/store/user/abaty/TrackingPhase1_MC/Hydjet_RAW_30100/Baty_2017Phase1TrackingGeom_Hydjet_GEN/Baty_2017Phase1TrackingGeom_Hydjet_RAW_30100/170316_165333/0000/PbPbstep2_DIGI2017_13.root',
+#'/store/user/abaty/TrackingPhase1_MC/Hydjet_RAW_30100/Baty_2017Phase1TrackingGeom_Hydjet_GEN/Baty_2017Phase1TrackingGeom_Hydjet_RAW_30100/170316_165333/0000/PbPbstep2_DIGI2017_14.root',
 #'file:/afs/cern.ch/user/a/abaty/work/public/2017_Phase1_Tracking_Samples/Feb_20_2017/QCD_80_120_DIGIRAW.root'
-#'file:/afs/cern.ch/user/a/abaty/work/public/2017_Phase1_Tracking_Samples/Feb_20_2017/Hydjet_RAW.root'
-'/store/user/abaty/TrackingPhase1_MC/Hydjet_RAW/Baty_2017Phase1TrackingGeom_Hydjet_GEN/Baty_2017Phase1TrackingGeom_Hydjet_RAW/170316_162001/0000/PbPbstep2_DIGI2017_1.root'
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_1.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_2.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_3.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_4.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_5.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_6.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_7.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_8.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_9.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_10.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_11.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_12.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_13.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_14.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_15.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_16.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_17.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_18.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_19.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_20.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_21.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_22.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_23.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_24.root',
+#'/store/user/abaty/TrackingPhase1_MC/Pythia80_120_RAW/Baty_2017Phase1TrackingGeom_Pythia80_120_GENSIM/Baty_2017Phase1TrackingGeom_Pythia80_120_RAW/170314_143041/0000/step2_25.root',
+'file:/afs/cern.ch/user/a/abaty/work/public/2017_Phase1_Tracking_Samples/Feb_20_2017/LargerHydjetFile/PbPbstep2_DIGI2017_1.root'
+#'/store/user/abaty/TrackingPhase1_MC/Hydjet_RAW/Baty_2017Phase1TrackingGeom_Hydjet_GEN/Baty_2017Phase1TrackingGeom_Hydjet_RAW/170316_162001/0000/PbPbstep2_DIGI2017_1.root'
+
 ),
     secondaryFileNames = cms.untracked.vstring()
 )

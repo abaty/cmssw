@@ -10,6 +10,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/Utilities/interface/Exception.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
+#include <iostream>
 
 class GlobalTrackingRegionProducerFromBeamSpot : public TrackingRegionProducer {
 
@@ -124,6 +125,7 @@ public:
             scaledOriginRadius = theMinOriginR;
           }
         }
+        std::cout << "numberOfPixels: " <<  nPix << " " << scaledOriginRadius << " " << theOriginRadius << std::endl;
         //otherwise use the unscaled radius
         result.push_back( std::make_unique<GlobalTrackingRegion>(
             thePtMin, origin, scaledOriginRadius, std::max(theNSigmaZ*bs.sigmaZ(), theOriginHalfLength), thePrecise,theUseMS));

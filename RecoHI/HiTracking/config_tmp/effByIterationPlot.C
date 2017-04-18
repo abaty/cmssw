@@ -9,7 +9,7 @@
 #include "TAxis.h"
 #include "TLegend.h"
 
-void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
+void effByIterationPlot(float etaCut = 2.4, float ptCut = 0, bool onlyInclusive = false){
 
   gStyle->SetOptStat(0);
   gStyle->SetErrorX(0.);
@@ -43,7 +43,9 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
         -2.4, -2.0, -1.6, -1.2, -0.8, -0.4, 0.0,
         0.4, 0.8, 1.2, 1.6, 2.0, 2.4};
 
-  TFile * f = TFile::Open("trk.root","read");
+  TFile * f;
+  if(!onlyInclusive) f = TFile::Open("trk.root","read");
+  else               f = TFile::Open("test/trk.root","read");
   hsim[0] = (TH2D*)f->Get("HITrackCorrections/hsim");
   hrec[0] = (TH2D*)f->Get("HITrackCorrections/hrec");
   hfak[0] = (TH2D*)f->Get("HITrackCorrections/hfak"); 
@@ -54,6 +56,7 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
   heff[0]->SetDirectory(0);
   f->Close();
 
+  if(!onlyInclusive){
   for(int i = 0; i<nIterations; i++){
     TFile * f = TFile::Open(Form("trk_%d.root",i),"read");
     hsim[i+1] = (TH2D*)f->Get("HITrackCorrections/hsim");
@@ -66,9 +69,11 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
     heff[i+1]->SetDirectory(0);
     f->Close();   
   }
+  }
 
   TFile * f1 = TFile::Open("effByIteration.root","recreate");
   for(int i = 0; i<nIterations+1; i++){
+    if(onlyInclusive && i>0) continue;
     //defining profiles
     hsimPt[i] = new TH1D(Form("hsimPt%d",i),"",nptBins-1,ptBins);
     hrecPt[i] = new TH1D(Form("hrecPt%d",i),"",nptBins-1,ptBins);
@@ -129,6 +134,7 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
   heffPt[0]->Draw();
 
   //stacking histograms
+  if(!onlyInclusive){
   heffPt[0]->SetLineColor(kBlack);
   heffPt[0]->SetLineWidth(1);
   heffPt[0]->SetFillColor(41);
@@ -170,6 +176,7 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
   c1->SaveAs(Form("plots/pTEffByIteration_%d_%d.pdf",(int)(ptCut*10),(int)(etaCut*10))); 
   c1->SaveAs(Form("plots/pTEffByIteration_%d_%d.C",(int)(ptCut*10),(int)(etaCut*10))); 
   delete leg;
+  }
   delete c1;
 
 
@@ -189,6 +196,7 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
   heffEta[0]->Draw();
 
   //stacking histograms
+  if(!onlyInclusive){
   heffEta[0]->SetLineColor(kBlack);
   heffEta[0]->SetLineWidth(1);
   heffEta[0]->SetFillColor(41);
@@ -230,6 +238,7 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
   c1->SaveAs(Form("plots/EtaEffByIteration_%d_%d.pdf",(int)(ptCut*10),(int)(etaCut*10))); 
   c1->SaveAs(Form("plots/EtaEffByIteration_%d_%d.C",(int)(ptCut*10),(int)(etaCut*10))); 
   delete leg;
+  }
   delete c1;
   
   //ptfake
@@ -248,6 +257,7 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
   hfakPt[0]->Draw();
 
   //stacking histograms
+  if(!onlyInclusive){
   hfakPt[0]->SetLineColor(kBlack);
   hfakPt[0]->SetLineWidth(1);
   hfakPt[0]->SetFillColor(41);
@@ -289,8 +299,9 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
   c1->SaveAs(Form("plots/pTFakByIteration_%d_%d.pdf",(int)(ptCut*10),(int)(etaCut*10))); 
   c1->SaveAs(Form("plots/pTFakByIteration_%d_%d.C",(int)(ptCut*10),(int)(etaCut*10))); 
   delete leg;
+  }
   delete c1;
-
+  
 
   //etafak
   c1 = new TCanvas("c1","c1",800,800);
@@ -308,6 +319,7 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
   hfakEta[0]->Draw();
 
   //stacking histograms
+  if(!onlyInclusive){
   hfakEta[0]->SetLineColor(kBlack);
   hfakEta[0]->SetLineWidth(1);
   hfakEta[0]->SetFillColor(41);
@@ -349,5 +361,6 @@ void effByIterationPlot(float etaCut = 2.4, float ptCut = 0){
   c1->SaveAs(Form("plots/EtaFakByIteration_%d_%d.pdf",(int)(ptCut*10),(int)(etaCut*10))); 
   c1->SaveAs(Form("plots/EtaFakByIteration_%d_%d.C",(int)(ptCut*10),(int)(etaCut*10))); 
   delete leg;
+  }
   delete c1;
 }
