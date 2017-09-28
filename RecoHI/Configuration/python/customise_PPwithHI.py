@@ -15,21 +15,23 @@ def storeCaloTowersAOD(process):
 
     return process
 
+#delete a lot of features out of PF to save on timing
 def customisePF(process):
     process.load("RecoParticleFlow.Configuration.RecoParticleFlow_cff")
     process.particleFlowBlock.useNuclear = cms.bool(False)
     process.particleFlowTmp.usePFConversions = cms.bool(False)
 
     #kill this because it uses huge amount of timing and HI doesn't need it
-    #sets the radius under which interactions are NOT reco'd to be huge
     process.load("RecoParticleFlow.PFTracking.particleFlowDisplacedVertexCandidate_cfi")
     process.particleFlowDisplacedVertexCandidate.tracksSelectorParameters.pt_min = 999999.0
     process.particleFlowDisplacedVertexCandidate.tracksSelectorParameters.nChi2_max = 0.0
     process.particleFlowDisplacedVertexCandidate.tracksSelectorParameters.pt_min_prim = 999999.0
     process.particleFlowDisplacedVertexCandidate.tracksSelectorParameters.dxy = 999999.0
-    #process.load("RecoParticleFlow.PFTracking.particleFlowDisplacedVertex_cfi")
-    #process.particleFlowDisplacedVertex.primaryVertexCut = 999999.0
- 
+
+    #kill the entire Tau sequence as well, takes too long to run
+    process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
+    process.PFTau=cms.Sequence()#replace with an empty sequence
+
     return process
 
 #change vertexing to use gap fitter w/ zsep of 1cm (more robust in central evts)
