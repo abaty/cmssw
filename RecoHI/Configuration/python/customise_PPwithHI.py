@@ -46,7 +46,6 @@ def customisePF(process):
     return process
 
 #change vertexing to use gap fitter w/ zsep of 1cm (more robust in central evts)
-#also, slightly tighet d0 selection
 def customiseVertexing(process):
     process.load("RecoVertex.Configuration.RecoVertex_cff")
     process.unsortedOfflinePrimaryVertices.TkClusParameters = cms.PSet(
@@ -73,6 +72,7 @@ def customiseVertexing(process):
     return process
 
 #don't try tracking under 0.3 GeV (unused for analysis anyways)
+#higher threshhold for mixedtriplet/tobtec/pixelless steps to save on timing
 def customiseTracking(process):
 
     #initial step
@@ -117,7 +117,6 @@ def customiseTracking(process):
     process.tobTecStepTrackingRegionsPair.RegionPSet.ptMin = 0.9
     process.tobTecStepTrackingRegionsTripl.RegionPSet.ptMin = 0.9
     process.tobTecStepTrajectoryFilter.minPt = 0.9
-
 
     return process
 
