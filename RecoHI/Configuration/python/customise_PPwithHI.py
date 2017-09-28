@@ -19,7 +19,6 @@ def storeCaloTowersAOD(process):
 def customisePF(process):
     process.load("RecoParticleFlow.Configuration.RecoParticleFlow_cff")
     process.particleFlowBlock.useNuclear = cms.bool(False)
-    process.particleFlowTmp.usePFConversions = cms.bool(False)
 
     #kill this because it uses huge amount of timing and HI doesn't need it
     process.load("RecoParticleFlow.PFTracking.particleFlowDisplacedVertexCandidate_cfi")
@@ -32,16 +31,17 @@ def customisePF(process):
     process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
     process.PFTau=cms.Sequence()#replace with an empty sequence
 
-    #kill conversions (currently this doesn't do much)
-    process.load("RecoEgamma.EgammaPhotonProducers.allConversions_cfi")
-    process.allConversions.minSCEt = 99999.
-    process.allConversions.deltaEta = 0.0
-
     #kill charged hadron subtraction for in-time PU mitigation
     process.pfNoPileUpIso.enable = False
     process.pfPileUpIso.Enable = False
     process.pfNoPileUp.enable = False
     process.pfPileUp.Enable = False
+
+    #make it very hard to reconstruct conversions in this step (was bailing out in central events anyways)
+    process.load("RecoTracker.ConversionSeedGenerators.PhotonConversionTrajectorySeedProducerFromSingleLeg_cfi")
+    process.photonConvTrajSeedFromSingleLeg.RegionFactoryPSet.RegionPSet.ptMin = 999999.0
+    process.photonConvTrajSeedFromSingleLeg.RegionFactoryPSet.RegionPSet.originRadius = 0
+    process.photonConvTrajSeedFromSingleLeg.RegionFactoryPSet.RegionPSet.originHalfLength = 0
 
     return process
 
