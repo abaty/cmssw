@@ -29,8 +29,8 @@ def customisePF(process):
     process.particleFlowDisplacedVertexCandidate.tracksSelectorParameters.dxy = 999999.0
 
     #kill the entire Tau sequence as well, takes too long to run
-    process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
-    process.PFTau=cms.Sequence()#replace with an empty sequence
+    #process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
+    #process.PFTau=cms.Sequence()#replace with an empty sequence
 
     return process
 
