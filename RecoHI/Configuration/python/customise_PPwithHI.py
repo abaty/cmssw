@@ -29,8 +29,19 @@ def customisePF(process):
     process.particleFlowDisplacedVertexCandidate.tracksSelectorParameters.dxy = 999999.0
 
     #kill the entire Tau sequence as well, takes too long to run
-    #process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
-    #process.PFTau=cms.Sequence()#replace with an empty sequence
+    process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
+    process.PFTau=cms.Sequence()#replace with an empty sequence
+
+    #kill conversions (currently this doesn't do much)
+    process.load("RecoEgamma.EgammaPhotonProducers.allConversions_cfi")
+    process.allConversions.minSCEt = 99999.
+    process.allConversions.deltaEta = 0.0
+
+    #kill charged hadron subtraction for in-time PU mitigation
+    process.pfNoPileUpIso.enable = False
+    process.pfPileUpIso.Enable = False
+    process.pfNoPileUp.enable = False
+    process.pfPileUp.Enable = False
 
     return process
 
@@ -92,17 +103,20 @@ def customiseTracking(process):
    
     #mixed triplet step
     process.load("RecoTracker.IterativeTracking.MixedTripletStep_cff")
-    process.mixedTripletStepTrajectoryFilter.minPt = 0.3
-    process.mixedTripletStepPropagator.ptMin = 0.3
-    process.mixedTripletStepPropagatorOpposite.ptMin = 0.3
+    process.mixedTripletStepTrajectoryFilter.minPt = 0.4
+    process.mixedTripletStepPropagator.ptMin = 0.4
+    process.mixedTripletStepPropagatorOpposite.ptMin = 0.4
 
     #pixelless step
     process.load("RecoTracker.IterativeTracking.PixelLessStep_cff")
-    process.pixelLessStepTrajectoryFilter.minPt = 0.3
+    process.pixelLessStepTrackingRegions.RegionPSet.ptMin = 0.9
+    process.pixelLessStepTrajectoryFilter.minPt = 0.9
 
     #tobtec step
     process.load("RecoTracker.IterativeTracking.TobTecStep_cff")
-    process.tobTecStepTrajectoryFilter.minPt = 0.3
+    process.tobTecStepTrackingRegionsPair.RegionPSet.ptMin = 0.9
+    process.tobTecStepTrackingRegionsTripl.RegionPSet.ptMin = 0.9
+    process.tobTecStepTrajectoryFilter.minPt = 0.9
 
 
     return process
