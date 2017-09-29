@@ -77,28 +77,30 @@ def customiseTracking(process):
 
     #initial step
     process.load("RecoTracker.IterativeTracking.InitialStep_cff")
-    process.initialStepTrajectoryFilterBase.minPt=0.3
+    process.initialStepTrajectoryFilterBase.minPt=0.6  # ptmin of tracking region is 0.5
     
     #high pt triplet
     process.load("RecoTracker.IterativeTracking.HighPtTripletStep_cff")
-    process.highPtTripletStepTrajectoryFilterBase.minPt=0.3
+    process.highPtTripletStepTrajectoryFilterBase.minPt=0.7 # ptmin of tracking region is 0.6
 
     #detached triplet
     process.load("RecoTracker.IterativeTracking.DetachedTripletStep_cff")
-    process.detachedTripletStepTrajectoryFilterBase.minPt = 0.3
+    process.detachedTripletStepTrackingRegions.RegionPSet.ptMin = 0.8  # punt on low pt displaced tracks
+    process.detachedTripletStepTrajectoryFilterBase.minPt = 0.9 
 
     #detached quad
     process.load("RecoTracker.IterativeTracking.DetachedQuadStep_cff")
-    process.detachedQuadStepTrajectoryFilterBase.minPt = 0.3
+    process.detachedQuadStepTrackingRegions.RegionPSet.ptMin = 0.8  # punt on low pt displaced tracks
+    process.detachedQuadStepTrajectoryFilterBase.minPt = 0.9
 
     #low pt quad step
     process.load("RecoTracker.IterativeTracking.LowPtQuadStep_cff")
-    process.lowPtQuadStepTrackingRegions.RegionPSet.ptMin = 0.3  
+    process.lowPtQuadStepTrackingRegions.RegionPSet.ptMin = 0.25  
     process.lowPtQuadStepTrajectoryFilterBase.minPt=0.3  
 
     #low pt triplet step
     process.load("RecoTracker.IterativeTracking.LowPtTripletStep_cff")
-    process.lowPtTripletStepTrackingRegions.RegionPSet.ptMin = 0.3
+    process.lowPtTripletStepTrackingRegions.RegionPSet.ptMin = 0.25
     process.lowPtTripletStepStandardTrajectoryFilter.minPt = 0.3
    
     #mixed triplet step
@@ -109,14 +111,14 @@ def customiseTracking(process):
 
     #pixelless step
     process.load("RecoTracker.IterativeTracking.PixelLessStep_cff")
-    process.pixelLessStepTrackingRegions.RegionPSet.ptMin = 0.9
-    process.pixelLessStepTrajectoryFilter.minPt = 0.9
+    process.pixelLessStepTrackingRegions.RegionPSet.ptMin = 3.0
+    process.pixelLessStepTrajectoryFilter.minPt = 4.0
 
     #tobtec step
     process.load("RecoTracker.IterativeTracking.TobTecStep_cff")
-    process.tobTecStepTrackingRegionsPair.RegionPSet.ptMin = 0.9
-    process.tobTecStepTrackingRegionsTripl.RegionPSet.ptMin = 0.9
-    process.tobTecStepTrajectoryFilter.minPt = 0.9
+    process.tobTecStepTrackingRegionsPair.RegionPSet.ptMin = 3.0
+    process.tobTecStepTrackingRegionsTripl.RegionPSet.ptMin = 3.0
+    process.tobTecStepTrajectoryFilter.minPt = 4.0
 
     return process
 
@@ -128,4 +130,3 @@ def customisePPwithHI(process):
     process=customiseTracking(process)
 
     return process
-
