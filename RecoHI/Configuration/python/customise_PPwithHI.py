@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-#customisation by A. Baty for pp reco of XeXe run in Oct 2017
+#customisation for pp reco of XeXe run in Oct 2017
 
 # Add caloTowers to AOD event content
 def storeCaloTowersAOD(process):
@@ -13,6 +13,82 @@ def storeCaloTowersAOD(process):
     if hasattr(process,'AODSIMoutput'):
         process.AODSIMoutput.outputCommands.extend(['keep *_towerMaker_*_*'])
 
+    return process
+
+# Customize process to run HI-style photon isolation in the pp RECO sequences
+def addHIIsolationProducer(process):
+
+    process.load('Configuration.EventContent.EventContent_cff')
+    
+    # extend RecoEgammaFEVT content
+    process.RecoEgammaFEVT.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*'
+                                                  ])
+    
+    # extend RecoEgammaRECO content
+    process.RECOEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+    
+    process.FEVTEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+    process.FEVTSIMEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+    # extend RecoEgammaRECO content
+    process.RAWRECOEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    process.RECOSIMEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    process.RAWRECOSIMHLTEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+    
+    process.RAWRECODEBUGHLTEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    process.FEVTHLTALLEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    process.FEVTDEBUGEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    # extend RecoEgammaAOD content
+    process.AODEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                 'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*'
+                                                  ])
+
+    process.AODSIMEventContent.outputCommands.extend(['keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppGED_*_*',
+                                                 'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerpp_*_*'
+                                                  ])
+
+    # add HI Photon isolation sequence to pp RECO
+    process.load('RecoHI.HiEgammaAlgos.photonIsolationHIProducer_cfi')
+    process.load('RecoEcal.EgammaClusterProducers.islandBasicClusters_cfi')
+
+    process.photonIsolationHISequencePP = cms.Sequence(process.islandBasicClusters 
+                                                       * process.photonIsolationHIProducerpp 
+                                                       * process.photonIsolationHIProducerppGED)
+    
+    process.reconstruction *= process.photonIsolationHISequencePP
+    
     return process
 
 #delete a lot of features out of PF to save on timing
@@ -122,11 +198,52 @@ def customiseTracking(process):
 
     return process
 
+#copied almost exactly from RecoTracker/Configuration/python/customiseClusterCheckForHighPileup.py
+#also need to reenable doClusterCheck because it is turned off by default in phase 1
+def customiseClusterCheck(process):
+    _maxPixel = 100000
+
+    #FIXME:
+    #FIXME:
+    #FIXME: add back last two cuts with parameters determined for XeXe phase 1 tracker!
+    #_cut = "strip < 1000000 && pixel < 100000 && (strip < 50000 + 10*pixel) && (pixel < 5000 + strip/7.)"
+    _cut = "strip < 1000000 && pixel < 100000" 
+    #ENDFIXME
+
+    _maxElement = 1000000
+
+    for module in process._Process__producers.values():
+        cppType = module._TypedParameterizable__type
+
+        # cluster multiplicity check
+        if cppType == "ClusterCheckerEDProducer":
+            module.doClusterCheck = True #added this line (not in pp config)
+            module.MaxNumberOfPixelClusters = _maxPixel
+            module.cut = _cut
+        if hasattr(module, "ClusterCheckPSet"):
+            module.ClusterCheckPSet.MaxNumberOfPixelClusters = _maxPixel
+            module.ClusterCheckPSet.doClusterCheck = True #added this line (not in pp config)
+            # PhotonConversionTrajectorySeedProducerFromQuadruplets does not have "cut"...
+            if hasattr(module.ClusterCheckPSet, "cut"):
+                module.ClusterCheckPSet.cut = _cut
+
+
+        if cppType in ["PixelTripletLargeTipEDProducer", "MultiHitFromChi2EDProducer"]:
+            module.maxElement = _maxElement
+        if hasattr(module, "OrderedHitsFactoryPSet") and hasattr(module.OrderedHitsFactoryPSet, "GeneratorPSet"):
+            #next line is in pp config but we comment it to be safe by changing more modules...
+            #if module.OrderedHitsFactoryPSet.GeneratorPSet.ComponentName.value() in ["PixelTripletLargeTipGenerator", "MultiHitGeneratorFromChi2"]:
+            module.OrderedHitsFactoryPSet.GeneratorPSet.maxElement = _maxElement
+    
+    return process
+
 def customisePPwithHI(process):
 
     process=storeCaloTowersAOD(process)
+    process=addHIIsolationProducer(process)
     process=customisePF(process)
     process=customiseVertexing(process)
     process=customiseTracking(process)
+    process=customiseClusterCheck(process)
 
     return process
