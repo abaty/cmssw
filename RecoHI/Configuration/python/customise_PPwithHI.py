@@ -119,6 +119,10 @@ def customisePF(process):
     process.photonConvTrajSeedFromSingleLeg.RegionFactoryPSet.RegionPSet.originRadius = 0
     process.photonConvTrajSeedFromSingleLeg.RegionFactoryPSet.RegionPSet.originHalfLength = 0
 
+    #get rid of low pt tracker electrons
+    process.load("RecoParticleFlow.PFTracking.trackerDrivenElectronSeeds_cfi")
+    process.trackerDrivenElectronSeeds.MinPt = 5.0
+
     return process
 
 #change vertexing to use gap fitter w/ zsep of 1cm (more robust in central evts)
@@ -144,6 +148,13 @@ def customiseVertexing(process):
             zSeparation = cms.double(1.0)        ## 1 cm max separation between clusters
         )
     )
+
+    #pull back inclusive vertex finder, should help w/ timing on TrackVertexArbitrator
+    process.load("RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff")
+    process.inclusiveVertexFinder.minHits = 10
+    process.inclusiveVertexFinder.minPt = 1.0
+    process.inclusiveCandidateVertexFinderCvsL.minHits = 10
+    process.inclusiveCandidateVertexFinderCvsL.minPt = 1.0
 
     return process
 
