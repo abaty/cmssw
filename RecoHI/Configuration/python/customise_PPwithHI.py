@@ -125,30 +125,48 @@ def customisePF(process):
 
     return process
 
-#change vertexing to use gap fitter w/ zsep of 1cm (more robust in central evts)
 def customiseVertexing(process):
+    #Primary Vtxing
+    #change vertexing to use gap fitter w/ zsep of 1cm (more robust in central evts)
     process.load("RecoVertex.Configuration.RecoVertex_cff")
+    process.unsortedOfflinePrimaryVertices.TkFilterParameters = cms.PSet(
+        algorithm=cms.string('filter'),
+        maxNormalizedChi2 = cms.double(10.0),
+        minPixelLayersWithHits=cms.int32(2),
+        minSiliconLayersWithHits = cms.int32(5),
+        maxD0Significance = cms.double(3.0), #used to be 5
+        minPt = cms.double(0.0),
+        maxEta = cms.double(2.4),
+        trackQuality = cms.string("any")
+    )
     process.unsortedOfflinePrimaryVertices.TkClusParameters = cms.PSet(
         algorithm = cms.string("gap"),
         TkGapClusParameters = cms.PSet(
             zSeparation = cms.double(1.0)        ## 1 cm max separation between clusters
         )
     )
+
+    #also hit the vtx made after the initial step
+    process.load("RecoTracker.IterativeTracking.InitialStep_cff")
+    process.firstStepPrimaryVerticesUnsorted.TkFilterParameters = cms.PSet(
+        algorithm=cms.string('filter'),
+        maxNormalizedChi2 = cms.double(10.0),
+        minPixelLayersWithHits=cms.int32(2),
+        minSiliconLayersWithHits = cms.int32(5),
+        maxD0Significance = cms.double(3.0), #used to be 5
+        minPt = cms.double(0.0),
+        maxEta = cms.double(2.4),
+        trackQuality = cms.string("any")
+    )
+    process.firstStepPrimaryVerticesUnsorted.TkClusParameters = cms.PSet(
+        algorithm = cms.string("gap"),
+        TkGapClusParameters = cms.PSet(
+            zSeparation = cms.double(1.0)        ## 1 cm max separation between clusters
+        )
+    )
     
-    process.offlinePrimaryVertices.TkClusParameters = cms.PSet(
-        algorithm = cms.string("gap"),
-        TkGapClusParameters = cms.PSet(
-            zSeparation = cms.double(1.0)        ## 1 cm max separation between clusters
-        )
-    )
 
-    process.offlinePrimaryVerticesWithBS.TkClusParameters = cms.PSet(
-        algorithm = cms.string("gap"),
-        TkGapClusParameters = cms.PSet(
-            zSeparation = cms.double(1.0)        ## 1 cm max separation between clusters
-        )
-    )
-
+    #b-tagging vtxing
     #pull back inclusive vertex finder, should help w/ timing on TrackVertexArbitrator
     process.load("RecoVertex.AdaptiveVertexFinder.inclusiveVertexing_cff")
     process.inclusiveVertexFinder.minHits = 10
@@ -156,60 +174,187 @@ def customiseVertexing(process):
     process.inclusiveCandidateVertexFinderCvsL.minHits = 10
     process.inclusiveCandidateVertexFinderCvsL.minPt = 1.0
 
+
     return process
 
 #don't try tracking under 0.3 GeV (unused for analysis anyways)
 #higher threshhold for mixedtriplet/tobtec/pixelless steps to save on timing
 def customiseTracking(process):
 
+    from RecoTracker.TkTrackingRegions.globalTrackingRegionWithVertices_cfi import globalTrackingRegionWithVertices as _globalTrackingRegionWithVertices
     #initial step
     process.load("RecoTracker.IterativeTracking.InitialStep_cff")
     process.initialStepTrajectoryFilterBase.minPt=0.6  # ptmin of tracking region is 0.5
-    
+     
+    #jet core
+    process.load("RecoTracker.IterativeTracking.JetCoreRegionalStep_cff")
+    process.jetCoreRegionalStepTrajectoryFilter.minPt = 5.0 #ptmin of tracking region is 10
+
     #high pt triplet
     process.load("RecoTracker.IterativeTracking.HighPtTripletStep_cff")
+    process.highPtTripletStepTrackingRegions = _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
+        precise = True,
+        useMultipleScattering = False,
+        useFakeVertices       = False,
+        beamSpot = "offlineBeamSpot",
+        useFixedError = True,
+        nSigmaZ = 4.0,
+        sigmaZVertex = 4.0,
+        fixedError = 0.2,
+        VertexCollection = "firstStepPrimaryVertices",
+        ptMin = 0.6,
+        useFoundVertices = True,
+        originRadius = 0.02
+    ))  
     process.highPtTripletStepTrajectoryFilterBase.minPt=0.7 # ptmin of tracking region is 0.6
 
     #detached triplet
     process.load("RecoTracker.IterativeTracking.DetachedTripletStep_cff")
-    process.detachedTripletStepTrackingRegions.RegionPSet.ptMin = 0.8  # punt on low pt displaced tracks
+    process.detachedTripletStepTrackingRegions = _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
+        precise = True,
+        useMultipleScattering = False,
+        useFakeVertices       = False,
+        beamSpot = "offlineBeamSpot",
+        useFixedError = True,
+        nSigmaZ = 4.0,
+        sigmaZVertex = 4.0,
+        fixedError = 3,
+        VertexCollection = "firstStepPrimaryVertices",
+        ptMin = 0.8,
+        useFoundVertices = True,
+        originRadius = 1.5
+    ))
     process.detachedTripletStepTrajectoryFilterBase.minPt = 0.9 
 
     #detached quad
     process.load("RecoTracker.IterativeTracking.DetachedQuadStep_cff")
-    process.detachedQuadStepTrackingRegions.RegionPSet.ptMin = 0.8  # punt on low pt displaced tracks
+    process.detachedQuadStepTrackingRegions = _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
+        precise = True,
+        useMultipleScattering = False,
+        useFakeVertices       = False,
+        beamSpot = "offlineBeamSpot",
+        useFixedError = True,
+        nSigmaZ = 4.0,
+        sigmaZVertex = 4.0,
+        fixedError = 3.75,
+        VertexCollection = "firstStepPrimaryVertices",
+        ptMin = 0.8,
+        useFoundVertices = True,
+        originRadius = 1.5
+    ))
     process.detachedQuadStepTrajectoryFilterBase.minPt = 0.9
 
     #low pt quad step
     process.load("RecoTracker.IterativeTracking.LowPtQuadStep_cff")
-    process.lowPtQuadStepTrackingRegions.RegionPSet.ptMin = 0.25  
+    process.lowPtQuadStepTrackingRegions = _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
+        precise = True,
+        useMultipleScattering = False,
+        useFakeVertices       = False,
+        beamSpot = "offlineBeamSpot",
+        useFixedError = True,
+        nSigmaZ = 4.0,
+        sigmaZVertex = 4.0,
+        fixedError = 0.5,
+        VertexCollection = "firstStepPrimaryVertices",
+        ptMin = 0.25,
+        useFoundVertices = True,
+        originRadius = 0.02
+    ))  
     process.lowPtQuadStepTrajectoryFilterBase.minPt=0.3  
 
     #low pt triplet step
     process.load("RecoTracker.IterativeTracking.LowPtTripletStep_cff")
-    process.lowPtTripletStepTrackingRegions.RegionPSet.ptMin = 0.25
+    process.lowPtTripletStepTrackingRegions = _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
+        precise = True,
+        useMultipleScattering = False,
+        useFakeVertices       = False,
+        beamSpot = "offlineBeamSpot",
+        useFixedError = True,
+        nSigmaZ = 4.0,
+        sigmaZVertex = 4.0,
+        fixedError = 0.2,
+        VertexCollection = "firstStepPrimaryVertices",
+        ptMin = 0.25,
+        useFoundVertices = True,
+        originRadius = 0.02
+    ))
     process.lowPtTripletStepStandardTrajectoryFilter.minPt = 0.3
    
     #mixed triplet step
     process.load("RecoTracker.IterativeTracking.MixedTripletStep_cff")
+    process.mixedTripletStepTrackingRegionsA = _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
+        precise = True,
+        useMultipleScattering = False,
+        useFakeVertices       = False,
+        beamSpot = "offlineBeamSpot",
+        useFixedError = True,#this means use fixedErrorBelow
+        nSigmaZ = 4.0,
+        sigmaZVertex = 4.0,
+        fixedError = 3.75,#a fourth the size of the pp version
+        VertexCollection = "firstStepPrimaryVertices",
+        ptMin = 0.4,
+        useFoundVertices = True,
+        originRadius = 1.5
+    ))
+    process.mixedTripletStepTrackingRegionsB = process.mixedTripletStepTrackingRegionsA.clone(RegionPSet = dict(ptMin=0.6, fixedError=2.5))
     process.mixedTripletStepTrajectoryFilter.minPt = 0.4
     process.mixedTripletStepPropagator.ptMin = 0.4
     process.mixedTripletStepPropagatorOpposite.ptMin = 0.4
 
     #pixelless step
     process.load("RecoTracker.IterativeTracking.PixelLessStep_cff")
-    process.pixelLessStepTrackingRegions.RegionPSet.ptMin = 3.0
-    process.pixelLessStepTrajectoryFilter.minPt = 4.0
+    process.pixelLessStepTrackingRegions = _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
+        precise = True,
+        useMultipleScattering = False,
+        useFakeVertices       = False,
+        beamSpot = "offlineBeamSpot",
+        useFixedError = True,#this means use fixedErrorBelow
+        nSigmaZ = 4.0,
+        sigmaZVertex = 4.0,
+        fixedError = 3.0,#a fourth the size of the pp version
+        VertexCollection = "firstStepPrimaryVertices",
+        ptMin = 2.0,
+        useFoundVertices = True,
+        originRadius = 1.0
+    ))
+    process.pixelLessStepTrajectoryFilter.minPt = 2.0
 
     #tobtec step
     process.load("RecoTracker.IterativeTracking.TobTecStep_cff")
-    process.tobTecStepTrackingRegionsPair.RegionPSet.ptMin = 3.0
-    process.tobTecStepTrackingRegionsTripl.RegionPSet.ptMin = 3.0
-    process.tobTecStepTrajectoryFilter.minPt = 4.0
+    process.tobTecStepTrackingRegionsTripl = _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
+        precise = True,
+        useMultipleScattering = False,
+        useFakeVertices       = False,
+        beamSpot = "offlineBeamSpot",
+        useFixedError = True,#this means use fixedErrorBelow
+        nSigmaZ = 4.0,
+        sigmaZVertex = 4.0,
+        fixedError = 5.0,#a fourth the size of the pp version
+        VertexCollection = "firstStepPrimaryVertices",
+        ptMin = 2.0,
+        useFoundVertices = True,
+        originRadius = 3.5
+))
+    process.tobTecStepTrackingRegionsPair = _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
+        precise = True,
+        useMultipleScattering = False,
+        useFakeVertices       = False,
+        beamSpot = "offlineBeamSpot",
+        useFixedError = True,#this means use fixedErrorBelow
+        nSigmaZ = 4.0,
+        sigmaZVertex = 4.0,
+        fixedError = 7.5,#a fourth the size of the pp version
+        VertexCollection = "firstStepPrimaryVertices",
+        ptMin = 2.0,
+        useFoundVertices = True,
+        originRadius = 6.0
+))
+    process.tobTecStepTrajectoryFilter.minPt = 2.0
 
     return process
 
 #copied almost exactly from RecoTracker/Configuration/python/customiseClusterCheckForHighPileup.py
+#some threshholds have been retuned however
 #also need to reenable doClusterCheck because it is turned off by default in phase 1
 def customiseClusterCheck(process):
     _maxPixel = 100000
