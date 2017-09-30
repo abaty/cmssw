@@ -91,6 +91,109 @@ def addHIIsolationProducer(process):
     
     return process
 
+# Customize process to run and add photons reconstructed with Island Clustering
+def addIslandPhotons(process):
+
+    process.load('Configuration.EventContent.EventContent_cff')
+
+    # extend RecoEgammaFEVT content
+    process.RecoEgammaFEVT.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*'
+                                                  ])
+    
+    # extend RecoEgammaRECO content
+    process.RECOEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+    
+    process.FEVTEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+    process.FEVTSIMEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+    # extend RecoEgammaRECO content
+    process.RAWRECOEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    process.RECOSIMEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    process.RAWRECOSIMHLTEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    process.RECODEBUGEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+    
+    process.RAWRECODEBUGHLTEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    process.FEVTHLTALLEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    process.FEVTDEBUGEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                  'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*',
+                                                  'keep recoCaloClusters_islandBasicClusters_*_*'
+                                                  ])
+
+    # extend RecoEgammaAOD content
+    process.AODEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                 'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*'
+                                                  ])
+
+    process.AODSIMEventContent.outputCommands.extend(['keep recoPhotons_islandPhotons_*_*',
+                                                 'keep recoHIPhotonIsolationedmValueMap_photonIsolationHIProducerppIsland_*_*'
+                                                  ])
+
+    process.load('RecoEgamma.EgammaPhotonProducers.photonSequence_cff')
+    
+    process.islandPhotonCore = process.photonCore.clone()
+    process.islandPhotonCore.scHybridBarrelProducer = cms.InputTag("correctedIslandBarrelSuperClusters")
+    process.islandPhotonCore.scIslandEndcapProducer = cms.InputTag("correctedIslandEndcapSuperClusters")
+    process.islandPhotonCore.minSCEt = cms.double(8.0)
+
+    process.islandPhotons = process.photons.clone()
+    process.islandPhotons.photonCoreProducer = cms.InputTag("islandPhotonCore")
+    process.islandPhotons.minSCEtBarrel = cms.double(5.0)
+    process.islandPhotons.minSCEtEndcap = cms.double(15.0)
+    process.islandPhotons.minR9Barrel = cms.double(10.)
+    process.islandPhotons.minR9Endcap = cms.double(10.)
+    process.islandPhotons.maxHoverEEndcap = cms.double(0.5)
+    process.islandPhotons.maxHoverEBarrel = cms.double(0.99)
+
+    process.photonSequenceIsland = cms.Sequence(process.islandPhotonCore+process.islandPhotons)
+
+    process.load('RecoHI.HiEgammaAlgos.photonIsolationHIProducer_cfi')
+
+    process.photonIsolationHIProducerppIsland = process.photonIsolationHIProducer.clone(
+                                                          trackCollection = cms.InputTag("generalTracks")
+                                                          )
+
+    process.load('RecoHI.HiEgammaAlgos.HiIslandClusteringSequence_cff')
+
+    process.islandSequencePP = cms.Sequence(process.islandClusteringSequence 
+                                                       * process.photonSequenceIsland 
+                                                       * process.photonIsolationHIProducerppIsland)
+    
+    process.reconstruction *= process.islandSequencePP
+    
+    return process
+
 #delete a lot of features out of PF to save on timing
 def customisePF(process):
     process.load("RecoParticleFlow.Configuration.RecoParticleFlow_cff")
@@ -397,6 +500,7 @@ def customisePPwithHI(process):
 
     process=storeCaloTowersAOD(process)
     process=addHIIsolationProducer(process)
+    process=addIslandPhotons(process)
     process=customisePF(process)
     process=customiseVertexing(process)
     process=customiseTracking(process)
