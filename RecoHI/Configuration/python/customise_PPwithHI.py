@@ -462,12 +462,9 @@ def customiseTracking(process):
 def customiseClusterCheck(process):
     _maxPixel = 100000
 
-    #FIXME:
-    #FIXME:
-    #FIXME: add back last two cuts with parameters determined for XeXe phase 1 tracker!
+    #this cut was tuned with XeXe MC: The old cut used for peripheral PbPb in 2015 is listed in comment below    
     #_cut = "strip < 1000000 && pixel < 100000 && (strip < 50000 + 10*pixel) && (pixel < 5000 + strip/7.)"
-    _cut = "strip < 1000000 && pixel < 100000" 
-    #ENDFIXME
+    _cut = "strip < 1000000 && pixel < 100000 && (strip < 50000 + 10*pixel) && (pixel < 5000 + strip/2.)"
 
     _maxElement = 1000000
 
