@@ -1156,7 +1156,7 @@ void SiStripAPVRestorer::DerivativeFollowerRestore(const uint16_t& APVn, const u
 			
 			if (((valor_discontinuidad> discontinuity_threshold)&&(isMax==false)&&(isMinimumAndNoMax==true)&&(abs(valor_anterior- singleAPVdigi[first_start_cluster_strip +1])<=discontinuity_threshold)&&((strip-1)!=(first_start_cluster_ADC+1))&&(isMinimum_found==false))||(counter_width_cluster > width_cluster)){ //agregar el "o" y agregar el || del tamano de cluster
 				isMinimumAndNoMax=false;
-std::cout << "Dicontinuidad: " << valor_discontinuidad <<" " << valor_presente <<"-" << valor_anterior<< std::endl;std::cout << "detId: " << detId_ << std::endl;
+//std::cout << "Dicontinuidad: " << valor_discontinuidad <<" " << valor_presente <<"-" << valor_anterior<< std::endl;std::cout << "detId: " << detId_ << std::endl;
 			}
 			
 			if (((valor_discontinuidad> discontinuity_threshold)&&(isMax==false)&&(isMinimumAndNoMax==false))||(counter_width_cluster > width_cluster)){  // agregar el || del tamano de cluster            //----&& (valor_discontinuidad>=aux_discontinuidad)
@@ -1325,7 +1325,7 @@ std::cout << "Dicontinuidad: " << valor_discontinuidad <<" " << valor_presente <
 			
 			if ((firstStrip <= strip) && (strip <= lastStrip) && (0 < (singleAPVdigi[strip]- firstADC - ((secondADC-firstADC)/(lastStrip-firstStrip))*(strip-firstStrip)-discontinuity_threshold))){
 				digis[(APVn-firstAPV)*128+strip]= singleAPVdigi[strip]- firstADC - (((secondADC-firstADC)/(lastStrip-firstStrip))*(strip-firstStrip));
-		std::cout << "no baseline " << digis[(APVn-firstAPV)*128+strip] << std::endl;
+		//std::cout << "no baseline " << digis[(APVn-firstAPV)*128+strip] << std::endl;
 			} else { 
 				digis[(APVn-firstAPV)*128+strip]=0;
 			}

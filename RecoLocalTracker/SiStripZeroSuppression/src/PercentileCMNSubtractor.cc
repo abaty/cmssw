@@ -1,4 +1,5 @@
 #include "RecoLocalTracker/SiStripZeroSuppression/interface/PercentileCMNSubtractor.h"
+#include <iostream>
 
 void PercentileCMNSubtractor::subtract(const uint32_t& detId, const uint16_t& firstAPV, std::vector<int16_t>& digis) {subtract_(detId, firstAPV, digis);}
 void PercentileCMNSubtractor::subtract(const uint32_t& detId, const uint16_t& firstAPV, std::vector<float>& digis) {subtract_(detId,firstAPV, digis);}
@@ -20,6 +21,7 @@ subtract_(const uint32_t& detId,const uint16_t& firstAPV, std::vector<T>& digis)
     endAPV = strip+128; tmp.clear();
     tmp.insert(tmp.end(),strip,endAPV);
     const float offset = percentile(tmp,percentile_);
+    std::cout << offset << std::endl;
 
     _vmedians.push_back(std::pair<short,float>((strip-digis.begin())/128+firstAPV,offset));
 

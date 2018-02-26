@@ -8,7 +8,8 @@ DefaultAlgorithms = cms.PSet(
 
     ## Baseline finder ---------------------
     ## Supported CMN modes: Median, Percentile, IteratedMedian, TT6, FastLinear
-    CommonModeNoiseSubtractionMode = cms.string('IteratedMedian'),     
+    CommonModeNoiseSubtractionMode = cms.string('IteratedMedian'),#default     
+    #CommonModeNoiseSubtractionMode = cms.string('Median'),     
 
     #CutToAvoidSignal = cms.double(3.0), ## for TT6
     
@@ -20,6 +21,7 @@ DefaultAlgorithms = cms.PSet(
     ## APV restoration ---------------------
     # Supported inspect modes: BaselineFollower, AbnormalBaseline, Null, BaselineAndSaturation
     APVInspectMode = cms.string("BaselineFollower"),
+    #APVInspectMode = cms.string("DerivativeFollower"),
     ForceNoRestore = cms.bool(False),
     useRealMeanCM = cms.bool(False),
     DeltaCMThreshold = cms.uint32(20),       # for BaselineFollower inspect
@@ -31,6 +33,7 @@ DefaultAlgorithms = cms.PSet(
 
     # Supported restore modes: Flat, BaselineFollower, IterativeMedian
     APVRestoreMode = cms.string("BaselineFollower"),
+    #APVRestoreMode = cms.string("DerivativeFollower"),
     nSigmaNoiseDerTh = cms.uint32(4),        # threshold for rejecting hit strips: nSigma * noise
     consecThreshold = cms.uint32(5),         # minimum length of flat region
     hitStripThreshold = cms.uint32(40),      # height above median when strip is definitely a hit
@@ -45,8 +48,10 @@ DefaultAlgorithms = cms.PSet(
 
     # Derivative follower parameters
     discontinuityThreshold = cms.int32(12),
+    #discontinuityThreshold = cms.int32(6),
     lastGradient = cms.int32(10),
     sizeWindow = cms.int32(1),
+    #sizeWindow = cms.int32(3),
     widthCluster = cms.int32(64),
     
     

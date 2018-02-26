@@ -35,19 +35,19 @@ hcalnoise.trackCollName = 'hiGeneralTracks'
 
 # Global + High-Level Reco Sequence
 globalRecoPbPb = cms.Sequence(hiTracking_wSplitting
-                              * hiParticleFlowLocalReco
-                              * hiEcalClusters
-                              * hiRecoJets
-                              * muonRecoPbPb
-                              * hiElectronSequence 
-                              * hiEgammaSequence
-                              * hiParticleFlowReco
-                              * hiCentrality
-                              * centralityBin
-                              * hiClusterCompatibility
-                              * hiEvtPlane
-                              * hcalnoise
-                              * muonRecoHighLevelPbPb
+#                              * hiParticleFlowLocalReco
+#                              * hiEcalClusters
+#                              * hiRecoJets
+#                              * muonRecoPbPb
+#                              * hiElectronSequence 
+#                              * hiEgammaSequence
+#                              * hiParticleFlowReco
+#                              * hiCentrality
+#                              * centralityBin
+#                              * hiClusterCompatibility
+#                              * hiEvtPlane
+#                              * hcalnoise
+#                              * muonRecoHighLevelPbPb
                               )
 
 globalRecoPbPb_wConformalPixel = cms.Sequence(hiTracking_wConformalPixel
