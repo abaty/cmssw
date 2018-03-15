@@ -169,6 +169,11 @@ lowPtQuadStep =  TrackMVAClassifierPrompt.clone(
     qualityCuts = [-0.7,-0.35,-0.15],
 )
 
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(lowPtQuadStep,TrackCutClassifier.clone(
+	src='lowPtQuadStepTracks'
+))
+
 # For Phase2PU140
 import RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi
 lowPtQuadStepSelector = RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi.multiTrackSelector.clone(

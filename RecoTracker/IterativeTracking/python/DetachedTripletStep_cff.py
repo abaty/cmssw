@@ -240,6 +240,11 @@ trackingPhase1.toReplaceWith(detachedTripletStep, detachedTripletStepClassifier1
      qualityCuts = [-0.2,0.3,0.8],
 ))
 
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(detachedTripletStep,TrackCutClassifier.clone(
+	src='detachedTripletStepTracks'
+))
+
 # For LowPU
 import RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi
 detachedTripletStepSelector = RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi.multiTrackSelector.clone(

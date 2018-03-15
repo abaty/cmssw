@@ -216,6 +216,10 @@ highPtTripletStep = TrackMVAClassifierPrompt.clone(
     mva = dict(GBRForestLabel = 'MVASelectorHighPtTripletStep_Phase1'),
     qualityCuts	= [0.2,0.3,0.4],
 )
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(highPtTripletStep,TrackCutClassifier.clone(
+	src='highPtTripletStepTracks'
+))
 
 
 # For Phase2PU140

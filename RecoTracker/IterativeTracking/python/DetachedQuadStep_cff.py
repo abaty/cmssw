@@ -180,6 +180,10 @@ detachedQuadStep = TrackMVAClassifierDetached.clone(
     mva = dict(GBRForestLabel = 'MVASelectorDetachedQuadStep_Phase1'),
     qualityCuts = [-0.5,0.0,0.5],
 )
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(detachedQuadStep,TrackCutClassifier.clone(
+	src='detachedQuadStepTracks'
+))
 
 
 # For Phase2PU140

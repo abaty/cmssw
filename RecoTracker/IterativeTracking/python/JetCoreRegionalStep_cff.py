@@ -192,6 +192,10 @@ trackingPhase1.toReplaceWith(jetCoreRegionalStep, TrackMVAClassifierPrompt.clone
 ))
 fastSim.toModify(jetCoreRegionalStep,vertices = "firstStepPrimaryVerticesBeforeMixing")
 
+pp_on_AA_2018.toReplaceWith(jetCoreRegionalStep,TrackCutClassifier.clone(
+	src='jetCoreRegionalStepTracks'
+))
+
 # Final sequence
 JetCoreRegionalStepTask = cms.Task(jetsForCoreTracking,                 
                                    firstStepGoodPrimaryVertices,

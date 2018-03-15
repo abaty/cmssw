@@ -365,6 +365,11 @@ trackingPhase1.toReplaceWith(tobTecStep, tobTecStepClassifier1.clone(
      qualityCuts = [-0.6,-0.45,-0.3],
 ))
 
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(tobTecStep,TrackCutClassifier.clone(
+	src='tobTecStepTracks'
+))
+
 import RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi
 trackingLowPU.toReplaceWith(tobTecStep, RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi.multiTrackSelector.clone(
     src = 'tobTecStepTracks',

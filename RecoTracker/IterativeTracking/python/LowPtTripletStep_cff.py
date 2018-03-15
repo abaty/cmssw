@@ -258,6 +258,11 @@ trackingPhase1.toReplaceWith(lowPtTripletStep, lowPtTripletStep.clone(
 ))
 fastSim.toModify(lowPtTripletStep, vertices = "firstStepPrimaryVerticesBeforeMixing")
 
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(lowPtTripletStep,TrackCutClassifier.clone(
+	src='lowPtTripletStepTracks'
+))
+
 
 # For LowPU and Phase2PU140
 import RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi

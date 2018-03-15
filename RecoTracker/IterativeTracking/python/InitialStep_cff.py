@@ -263,6 +263,11 @@ trackingPhase1.toReplaceWith(initialStep, initialStepClassifier1.clone(
         qualityCuts = [-0.95,-0.85,-0.75],
 ))
 
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(initialStep,TrackCutClassifier.clone(
+	src='initialStepTracks'
+))
+
 # For LowPU and Phase2PU140
 import RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi
 initialStepSelector = RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi.multiTrackSelector.clone(
