@@ -69,7 +69,7 @@ for e in [pp_on_XeXe_2017, pp_on_AA_2018]:
     e.toReplaceWith(highPtTripletStepTrackingRegions, 
                     _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
                 fixedError = 0.2,
-                ptMin = 0.6,
+                ptMin = 0.7,
                 originRadius = 0.02
                 )
                                                                       )

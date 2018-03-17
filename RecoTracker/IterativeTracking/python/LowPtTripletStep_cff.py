@@ -63,8 +63,8 @@ from RecoTracker.TkTrackingRegions.globalTrackingRegionWithVertices_cff import g
 for e in [pp_on_XeXe_2017, pp_on_AA_2018]:
     e.toReplaceWith(lowPtTripletStepTrackingRegions, 
                     _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
-                fixedError = 0.2,
-                ptMin = 0.25,
+                useFixedError = False,
+                ptMin = 0.3,
                 originRadius = 0.02
                 )
                                                                       )

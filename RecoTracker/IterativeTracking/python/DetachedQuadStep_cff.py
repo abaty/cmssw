@@ -39,7 +39,7 @@ for e in [pp_on_XeXe_2017, pp_on_AA_2018]:
     e.toReplaceWith(detachedQuadStepTrackingRegions, 
                     _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
                 fixedError = 3.75,
-                ptMin = 0.8,
+                ptMin = 0.9,
                 originRadius = 1.5
                 )
                                                                       )
