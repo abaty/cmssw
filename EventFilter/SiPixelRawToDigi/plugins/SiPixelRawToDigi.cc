@@ -37,7 +37,10 @@
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 
 #include "TH1D.h"
+#include "TH2F.h"
+#include "TProfile.h"
 #include "TFile.h"
+#include <iostream>
 
 using namespace std;
 
@@ -48,6 +51,10 @@ SiPixelRawToDigi::SiPixelRawToDigi( const edm::ParameterSet& conf )
     regions_(nullptr),
     hCPU(nullptr), hDigi(nullptr)
 {
+
+  edm::Service<TFileService> fs;
+  pix_h = fs->make<TH2F>( "FEDocc"  , ";FED id; size (bytes)", 140,1200,1340,100,0,20000 );
+  pix_p = fs->make<TProfile>("avg",";FED id; average size (bytes)",140,1200,1340);
 
   includeErrors = config_.getParameter<bool>("IncludeErrors");
   useQuality = config_.getParameter<bool>("UseQualityInfo");
@@ -229,7 +236,7 @@ void SiPixelRawToDigi::produce( edm::Event& ev,
     const FEDRawData& fedRawData = buffers->FEDData( fedId );
 
     //convert data to digi and strip off errors
-    formatter.interpretRawData( errorsInEvent, fedId, fedRawData, *collection, errors);
+    formatter.interpretRawData( errorsInEvent, fedId, fedRawData, *collection, errors, pix_h, pix_p);
 
     //pack errors into collection
     if(includeErrors) {

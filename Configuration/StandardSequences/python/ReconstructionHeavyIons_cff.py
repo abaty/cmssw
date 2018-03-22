@@ -27,7 +27,7 @@ from RecoLocalMuon.Configuration.RecoLocalMuon_cff import *
 #--------------------------------------------------------------------------
 # HIGH LEVEL RECO
 
-from RecoHI.Configuration.Reconstruction_HI_cff import *
+#from RecoHI.Configuration.Reconstruction_HI_cff import *
 from RecoHI.Configuration.Reconstruction_hiPF_cff import *
 from RecoLocalCalo.Castor.Castor_cff import *
 from RecoHI.HiEgammaAlgos.HiElectronSequence_cff import *
@@ -51,7 +51,8 @@ localReco_HcalNZS = cms.Sequence(bunchSpacingProducer*offlineBeamSpot*muonReco*c
 
 #--------------------------------------------------------------------------
 # Main Sequence
-reconstruct_PbPb = cms.Sequence(localReco*CastorFullReco*globalRecoPbPb)
+#reconstruct_PbPb = cms.Sequence(localReco*CastorFullReco*globalRecoPbPb)
+reconstruct_PbPb = cms.Sequence(localReco)
 reconstructionHeavyIons = cms.Sequence(reconstruct_PbPb)
 
 reconstructionHeavyIons_HcalNZS = cms.Sequence(localReco_HcalNZS*globalRecoPbPb)

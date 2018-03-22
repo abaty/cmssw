@@ -40,10 +40,13 @@
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "EventFilter/SiPixelRawToDigi/interface/ErrorChecker.h"
 #include "FWCore/Utilities/interface/typedefs.h"
-
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include <vector>
 #include <map>
 #include <set>
+#include "TH2F.h"
+#include "TProfile.h"
 
 class FEDRawData;
 class SiPixelFedCabling;
@@ -78,7 +81,7 @@ public:
   int nDigis() const { return theDigiCounter; }
   int nWords() const { return theWordCounter; }
 
-  void interpretRawData(bool& errorsInEvent, int fedId,  const FEDRawData & data, Collection & digis, Errors & errors);
+  void interpretRawData(bool& errorsInEvent, int fedId,  const FEDRawData & data, Collection & digis, Errors & errors, TH2F * pix_h, TProfile * pix_p);
 
   void formatRawData( unsigned int lvl1_ID, RawData & fedRawData, const Digis & digis);
 

@@ -50,25 +50,25 @@ interestingTrackEcalDetIds.TrackCollection = "hiGeneralTracks"
 
 
 # Global + High-Level Reco Sequence
-globalRecoPbPb = cms.Sequence(hiTracking_wSplitting
-                              * hcalGlobalRecoSequence
-                              * hiParticleFlowLocalReco
-                              * hiEcalClusters
-                              * hiRecoJets
-                              * muonRecoPbPb
-                              * hiElectronSequence 
-                              * hiEgammaSequence
-                              * hiParticleFlowReco
-                              * egammaHighLevelRecoPostPF
-                              * hiCentrality
+globalRecoPbPb = cms.Sequence(#hiTracking_wSplitting
+                              #* hcalGlobalRecoSequence
+                              #* hiParticleFlowLocalReco
+                              #* hiEcalClusters
+                              #* hiRecoJets
+                              #* muonRecoPbPb
+                              #* hiElectronSequence 
+                              #* hiEgammaSequence
+                              #* hiParticleFlowReco
+                              #* egammaHighLevelRecoPostPF
+                              #* hiCentrality
                               #* centralityBin  # temporarily removed
-                              * hiClusterCompatibility
-                              * hiEvtPlane
-                              * hcalnoise
-                              * muonRecoHighLevelPbPb
-                              * particleFlowLinks
-                              * hiRecoPFJets
-                              * reducedRecHits
+                              #* hiClusterCompatibility
+                              #* hiEvtPlane
+                              #* hcalnoise
+                              #* muonRecoHighLevelPbPb
+                              #* particleFlowLinks
+                              #* hiRecoPFJets
+                              #* reducedRecHits
                               )
 globalRecoPbPb_wPhase1 = globalRecoPbPb.copy()
 globalRecoPbPb_wPhase1.replace(hiTracking_wSplitting, hiTracking_wSplitting_Phase1)

@@ -11,6 +11,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "TH2F.h"
+#include "TProfile.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
  
 /// sistrip classes
 namespace sistrip { class RawToClustersLazyUnpacker; }
@@ -64,6 +68,9 @@ namespace sistrip {
     inline void doAPVEmulatorCheck( bool );
 
     inline void legacy( bool );
+
+    TH2F * strips_h;
+    TProfile * strips_p;
 
   private:
     

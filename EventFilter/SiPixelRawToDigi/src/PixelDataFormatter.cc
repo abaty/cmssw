@@ -124,9 +124,13 @@ void PixelDataFormatter::passFrameReverter(const SiPixelFrameReverter* reverter)
   theFrameReverter = reverter;
 }
 
-void PixelDataFormatter::interpretRawData(bool& errorsInEvent, int fedId, const FEDRawData& rawData, Collection & digis, Errors& errors)
+void PixelDataFormatter::interpretRawData(bool& errorsInEvent, int fedId, const FEDRawData& rawData, Collection & digis, Errors& errors, TH2F * pix_h, TProfile * pix_p)
 {
   using namespace sipixelobjects;
+
+  pix_h->Fill(fedId,rawData.size());
+  pix_p->Fill(fedId,rawData.size());
+  std::cout << "pix fedId: " << fedId << " size: " << rawData.size() << std::endl;
 
   int nWords = rawData.size()/sizeof(Word64);
   if (nWords==0) return;

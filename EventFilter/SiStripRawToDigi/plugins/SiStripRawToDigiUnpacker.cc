@@ -17,7 +17,7 @@
 #include <iomanip>
 #include <ext/algorithm>
 #include "FWCore/Utilities/interface/RunningAverage.h"
-
+#include "TH2F.h"
 
 namespace sistrip {
 
@@ -40,6 +40,10 @@ namespace sistrip {
     doAPVEmulatorCheck_(true),
     errorThreshold_(errorThreshold)
   {
+    edm::Service<TFileService> fs;
+    strips_h = fs->make<TH2F>( "stripOcc"  , ";FedId;Size (bytes)", 381,  50.,  431.,100,0,10000 );
+    strips_p = fs->make<TProfile>( "avg"  , ";FedId;Average Size (bytes)", 381,  50.,  431 );
+
     if ( edm::isDebugEnabled() ) {
       LogTrace("SiStripRawToDigi")
 	<< "[sistrip::RawToDigiUnpacker::"<<__func__<<"]"
@@ -107,7 +111,9 @@ namespace sistrip {
     
       // Retrieve FED raw data for given FED 
       const FEDRawData& input = buffers.FEDData( static_cast<int>(*ifed) );
-    
+      strips_h->Fill(*ifed,input.size());
+      strips_p->Fill(*ifed,input.size());
+
       // Some debug on FED buffer size
       if ( edm::isDebugEnabled() ) {
 	if ( first_ && input.data() ) {

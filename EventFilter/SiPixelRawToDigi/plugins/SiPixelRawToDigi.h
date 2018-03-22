@@ -16,6 +16,10 @@
 #include "DataFormats/FEDRawData/interface/FEDRawDataCollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Utilities/interface/CPUTimer.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "TH2F.h"
+#include "TProfile.h"
 
 class SiPixelFedCablingTree;
 class SiPixelFedCabling;
@@ -36,6 +40,9 @@ public:
 
   /// get data, convert to digis attach againe to Event
   void produce( edm::Event&, const edm::EventSetup& ) override;
+  TH2F * pix_h;
+  TProfile * pix_p;
+
 
 private:
 
