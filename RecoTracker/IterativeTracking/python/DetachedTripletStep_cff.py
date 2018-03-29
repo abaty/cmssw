@@ -54,8 +54,8 @@ from RecoTracker.TkTrackingRegions.globalTrackingRegionWithVertices_cff import g
 for e in [pp_on_XeXe_2017, pp_on_AA_2018]:
     e.toReplaceWith(detachedTripletStepTrackingRegions, 
                     _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
-                fixedError = 3.0,
-                ptMin = 0.8,
+                fixedError = 2.5,
+                ptMin = 0.9,
                 originRadius = 1.5
                 )
                                                                       )
@@ -238,6 +238,11 @@ detachedTripletStep.inputClassifiers=['detachedTripletStepClassifier1','detached
 trackingPhase1.toReplaceWith(detachedTripletStep, detachedTripletStepClassifier1.clone(
      mva = dict(GBRForestLabel = 'MVASelectorDetachedTripletStep_Phase1'),
      qualityCuts = [-0.2,0.3,0.8],
+))
+
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(detachedTripletStep,TrackCutClassifier.clone(
+	src='detachedTripletStepTracks'
 ))
 
 # For LowPU

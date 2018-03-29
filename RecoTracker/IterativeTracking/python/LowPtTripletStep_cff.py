@@ -63,8 +63,8 @@ from RecoTracker.TkTrackingRegions.globalTrackingRegionWithVertices_cff import g
 for e in [pp_on_XeXe_2017, pp_on_AA_2018]:
     e.toReplaceWith(lowPtTripletStepTrackingRegions, 
                     _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
-                fixedError = 0.2,
-                ptMin = 0.25,
+                useFixedError = False,
+                ptMin = 0.3,
                 originRadius = 0.02
                 )
                                                                       )
@@ -257,6 +257,11 @@ trackingPhase1.toReplaceWith(lowPtTripletStep, lowPtTripletStep.clone(
      qualityCuts = [-0.4,0.0,0.3],
 ))
 fastSim.toModify(lowPtTripletStep, vertices = "firstStepPrimaryVerticesBeforeMixing")
+
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(lowPtTripletStep,TrackCutClassifier.clone(
+	src='lowPtTripletStepTracks'
+))
 
 
 # For LowPU and Phase2PU140

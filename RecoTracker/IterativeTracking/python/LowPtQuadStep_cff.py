@@ -31,7 +31,7 @@ for e in [pp_on_XeXe_2017, pp_on_AA_2018]:
     e.toReplaceWith(lowPtQuadStepTrackingRegions, 
                     _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
                 fixedError = 0.5,
-                ptMin = 0.25,
+                ptMin = 0.3,
                 originRadius = 0.02
                 )
                                                             )
@@ -168,6 +168,11 @@ lowPtQuadStep =  TrackMVAClassifierPrompt.clone(
     mva = dict(GBRForestLabel = 'MVASelectorLowPtQuadStep_Phase1'),
     qualityCuts = [-0.7,-0.35,-0.15],
 )
+
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(lowPtQuadStep,TrackCutClassifier.clone(
+	src='lowPtQuadStepTracks'
+))
 
 # For Phase2PU140
 import RecoTracker.FinalTrackSelectors.multiTrackSelector_cfi

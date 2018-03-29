@@ -39,7 +39,7 @@ for e in [pp_on_XeXe_2017, pp_on_AA_2018]:
     e.toReplaceWith(detachedQuadStepTrackingRegions, 
                     _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
                 fixedError = 3.75,
-                ptMin = 0.8,
+                ptMin = 0.9,
                 originRadius = 1.5
                 )
                                                                       )
@@ -180,6 +180,10 @@ detachedQuadStep = TrackMVAClassifierDetached.clone(
     mva = dict(GBRForestLabel = 'MVASelectorDetachedQuadStep_Phase1'),
     qualityCuts = [-0.5,0.0,0.5],
 )
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(detachedQuadStep,TrackCutClassifier.clone(
+	src='detachedQuadStepTracks'
+))
 
 
 # For Phase2PU140

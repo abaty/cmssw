@@ -116,13 +116,13 @@ trackingLowPU.toModify(pixelLessStepTrackingRegions, RegionPSet = dict(
 
 from Configuration.Eras.Modifier_pp_on_XeXe_2017_cff import pp_on_XeXe_2017
 from Configuration.Eras.Modifier_pp_on_AA_2018_cff import pp_on_AA_2018
-from RecoTracker.TkTrackingRegions.globalTrackingRegionWithVertices_cff import globalTrackingRegionWithVertices as _globalTrackingRegionWithVertices
+from RecoTracker.IterativeTracking.MixedTripletStep_cff import mixedTripletStepTrackingRegionsA as _mixedTripletStepTrackingRegionsA
 for e in [pp_on_XeXe_2017, pp_on_AA_2018]:
     e.toReplaceWith(pixelLessStepTrackingRegions, 
-                    _globalTrackingRegionWithVertices.clone(RegionPSet=dict(
-                fixedError = 3.0,
-                ptMin = 2.0,
-                originRadius = 1.0
+                    _mixedTripletStepTrackingRegionsA.clone(RegionPSet=dict(
+                    fixedError = 3.0,
+                    ptMin = 2.0,
+                    originRadius = 1.0
                 )                                                                      )
 )
 
@@ -289,6 +289,11 @@ from Configuration.Eras.Modifier_trackingPhase1_cff import trackingPhase1
 trackingPhase1.toReplaceWith(pixelLessStep, pixelLessStepClassifier1.clone(
      mva = dict(GBRForestLabel = 'MVASelectorPixelLessStep_Phase1'),
      qualityCuts = [-0.4,0.0,0.4],
+))
+
+from RecoTracker.FinalTrackSelectors.TrackCutClassifier_cff import *
+pp_on_AA_2018.toReplaceWith(pixelLessStep,TrackCutClassifier.clone(
+	src='pixelLessStepTracks'
 ))
 
 # For LowPU
