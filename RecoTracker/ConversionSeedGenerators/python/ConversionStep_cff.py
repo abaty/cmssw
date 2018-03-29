@@ -254,15 +254,12 @@ from Configuration.Eras.Modifier_pp_on_XeXe_2017_cff import pp_on_XeXe_2017
 from Configuration.Eras.Modifier_pp_on_AA_2018_cff import pp_on_AA_2018
 for e in [pp_on_XeXe_2017, pp_on_AA_2018]:
     e.toModify(photonConvTrajSeedFromSingleLeg,
-                 RegionFactoryPSet = dict(RegionPSet=dict(
-                   originRadius = 0,
-                   originRScaling4BigEvts = cms.bool(True),
-                   minOriginR = 0,
-                   scalingStartNPix = 0,
-                   scalingEndNPix = 1#essentially turn off immediately 
-                 )),    
-                 ComponentName = cms.string('globalTrackingRegionWithVertices')
+               RegionFactoryPSet = dict(RegionPSet = dict(ptMin = 999999.0,
+                                                          originRadius = 0,
+                                                          originHalfLength = 0)
+                                        )
                )
+
 # TRACKER DATA CONTROL
 
 # QUALITY CUTS DURING TRACK BUILDING
