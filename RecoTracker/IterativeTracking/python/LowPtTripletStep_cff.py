@@ -213,6 +213,7 @@ lowPtTripletStepTrackCandidates = RecoTracker.CkfPattern.CkfTrackCandidates_cfi.
     useHitsSplitting = True,
     TrajectoryCleaner = 'lowPtTripletStepTrajectoryCleanerBySharedHits'
 )
+pp_on_AA_2018.toModify(lowPtTripletStepTrackCandidates, doSeedingRegionRebuilding = False)
 
 trackingPhase2PU140.toModify(lowPtTripletStepTrackCandidates,
     clustersToSkip = None,

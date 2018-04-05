@@ -271,6 +271,9 @@ mixedTripletStepTrackCandidates = RecoTracker.CkfPattern.CkfTrackCandidates_cfi.
     useHitsSplitting = True,
     TrajectoryCleaner = 'mixedTripletStepTrajectoryCleanerBySharedHits'
 )
+pp_on_AA_2018.toModify(mixedTripletStepTrackCandidates, doSeedingRegionRebuilding = False)
+
+
 import FastSimulation.Tracking.TrackCandidateProducer_cfi
 fastSim.toReplaceWith(mixedTripletStepTrackCandidates,
                       FastSimulation.Tracking.TrackCandidateProducer_cfi.trackCandidateProducer.clone(

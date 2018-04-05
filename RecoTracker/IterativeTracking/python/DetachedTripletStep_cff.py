@@ -186,6 +186,7 @@ detachedTripletStepTrackCandidates = RecoTracker.CkfPattern.CkfTrackCandidates_c
     doSeedingRegionRebuilding = True,
     useHitsSplitting = True
     )
+pp_on_AA_2018.toModify(detachedTripletStepTrackCandidates, doSeedingRegionRebuilding = False)
 
 from TrackingTools.TrajectoryCleaning.TrajectoryCleanerBySharedHits_cfi import trajectoryCleanerBySharedHits
 detachedTripletStepTrajectoryCleanerBySharedHits = trajectoryCleanerBySharedHits.clone(

@@ -147,6 +147,8 @@ lowPtQuadStepTrackCandidates = RecoTracker.CkfPattern.CkfTrackCandidates_cfi.ckf
     doSeedingRegionRebuilding = True,
     useHitsSplitting = True
 )
+pp_on_AA_2018.toModify(lowPtQuadStepTrackCandidates, doSeedingRegionRebuilding = False)
+
 trackingPhase2PU140.toModify(lowPtQuadStepTrackCandidates,
     clustersToSkip = None,
     phase2clustersToSkip = cms.InputTag("lowPtQuadStepClusters")

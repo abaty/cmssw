@@ -159,6 +159,8 @@ detachedQuadStepTrackCandidates = RecoTracker.CkfPattern.CkfTrackCandidates_cfi.
     doSeedingRegionRebuilding = True,
     useHitsSplitting = True
 )
+pp_on_AA_2018.toModify(detachedQuadStepTrackCandidates, doSeedingRegionRebuilding = False)
+
 trackingPhase2PU140.toModify(detachedQuadStepTrackCandidates,
     clustersToSkip = None,
     phase2clustersToSkip = cms.InputTag("detachedQuadStepClusters")

@@ -186,6 +186,7 @@ highPtTripletStepTrackCandidates = _CkfTrackCandidates_cfi.ckfTrackCandidates.cl
     doSeedingRegionRebuilding = True,
     useHitsSplitting = True
 )
+pp_on_AA_2018.toModify(highPtTripletStepTrackCandidates, doSeedingRegionRebuilding = False)
 
 # For Phase2PU140
 from TrackingTools.TrajectoryCleaning.TrajectoryCleanerBySharedHits_cfi import trajectoryCleanerBySharedHits as _trajectoryCleanerBySharedHits
