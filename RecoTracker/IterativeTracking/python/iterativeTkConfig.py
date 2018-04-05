@@ -93,7 +93,7 @@ _trackClusterRemoverBase = _trackClusterRemover.clone(
     maxChi2                                  = 9.0,
     pixelClusters                            = "siPixelClusters",
     stripClusters                            = "siStripClusters",
-    TrackQuality                             = 'highPurity',
+    TrackQuality                             = 'loose',
     minNumberOfLayersWithMeasBeforeFiltering = 0,
 )
 
