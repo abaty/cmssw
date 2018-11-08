@@ -126,6 +126,7 @@ struct TrackEvent {
 
   // -- rec tracks --
   int nTrk;
+  float leadingTrackPt[8];
   float trkEta[MAXTRACKS];
   float trkPhi[MAXTRACKS];
   float trkPt[MAXTRACKS];
@@ -550,6 +551,8 @@ TrackAnalyzer::fillTracks(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   pev_.nTrk = 0;
   pev_.N = 0;
+  for(int i = 0; i<8; i++) pev_.leadingTrackPt[i] = 0;
+
   for (unsigned it = 0; it<etracks->size(); ++it) {
     const reco::Track & etrk = (*etracks)[it];
     reco::TrackRef trackRef = reco::TrackRef(etracks,it);
@@ -630,9 +633,9 @@ TrackAnalyzer::fillTracks(const edm::Event& iEvent, const edm::EventSetup& iSetu
       }
 
       if (mvaSrcLabel_.label() == "generalTracks") {
-        pev_.trkMVALoose[pev_.nTrk] = (!((pev_.trkAlgo[pev_.nTrk] == 4 && pev_.trkMVA[pev_.nTrk] < -0.7) || (pev_.trkAlgo[pev_.nTrk] == 5 && pev_.trkMVA[pev_.nTrk] < -0.1) || (pev_.trkAlgo[pev_.nTrk] == 6 && pev_.trkMVA[pev_.nTrk] < 0.3) || (pev_.trkAlgo[pev_.nTrk] == 7 && pev_.trkMVA[pev_.nTrk] < 0.4) || (pev_.trkAlgo[pev_.nTrk] == 8 && pev_.trkMVA[pev_.nTrk] < -0.2) || (pev_.trkAlgo[pev_.nTrk] == 9 && pev_.trkMVA[pev_.nTrk] < 0.0) ||(pev_.trkAlgo[pev_.nTrk] == 10 && pev_.trkMVA[pev_.nTrk] < -0.3)) || pev_.trkMVA[pev_.nTrk] == -99) &&  etrk.quality(reco::TrackBase::qualityByName("highPurity"));
+        pev_.trkMVALoose[pev_.nTrk] = etrk.quality(reco::TrackBase::qualityByName("highPurity"));
 
-        pev_.trkMVATight[pev_.nTrk] = (!((pev_.trkAlgo[pev_.nTrk] == 4 && pev_.trkMVA[pev_.nTrk] < -0.7) || (pev_.trkAlgo[pev_.nTrk] == 5 && pev_.trkMVA[pev_.nTrk] < -0.1) || (pev_.trkAlgo[pev_.nTrk] == 6 && pev_.trkMVA[pev_.nTrk] < 0.3) || (pev_.trkAlgo[pev_.nTrk] == 7 && pev_.trkMVA[pev_.nTrk] < 0.5) || (pev_.trkAlgo[pev_.nTrk] == 8 && pev_.trkMVA[pev_.nTrk] < 0.5) || (pev_.trkAlgo[pev_.nTrk] == 9 && pev_.trkMVA[pev_.nTrk] < 0.4) ||(pev_.trkAlgo[pev_.nTrk] == 10 && pev_.trkMVA[pev_.nTrk] < 0)) || pev_.trkMVA[pev_.nTrk] == -99) &&  etrk.quality(reco::TrackBase::qualityByName("highPurity"));
+        pev_.trkMVATight[pev_.nTrk] = etrk.quality(reco::TrackBase::qualityByName("highPurity"));
       } else if (mvaSrcLabel_.label() == "hiGeneralTracks") {
         pev_.trkMVATight[pev_.nTrk] = (!((pev_.trkAlgo[pev_.nTrk] == 4 && pev_.trkMVA[pev_.nTrk] < -0.77) || (pev_.trkAlgo[pev_.nTrk] == 5 && pev_.trkMVA[pev_.nTrk] < 0.35) || (pev_.trkAlgo[pev_.nTrk] == 6 && pev_.trkMVA[pev_.nTrk] < 0.77) || (pev_.trkAlgo[pev_.nTrk] == 7 && pev_.trkMVA[pev_.nTrk] < 0.35)) || pev_.trkMVA[pev_.nTrk] == -99) &&  etrk.quality(reco::TrackBase::qualityByName("highPurity"));
       }
@@ -730,8 +733,31 @@ TrackAnalyzer::fillTracks(const edm::Event& iEvent, const edm::EventSetup& iSetu
       }
     }
 
-    pev_.nTrk++;
+   //check if this track is a leading track (for various cuts)
+   bool isHigherPt[8] = {false};
+   for(int i = 0; i<8; i++) isHigherPt[i] = etrk.pt() > pev_.leadingTrackPt[i];
+   bool hp = pev_.trkQual[0]; //highPurity
+   bool ptErrorCut = etrk.ptError()/etrk.pt()<0.1;
+   bool DCAz = fabs(pev_.trkDz1[pev_.nTrk]/pev_.trkDzError1[pev_.nTrk]) < 3.0;
+   bool DCAxy = fabs(pev_.trkDxy1[pev_.nTrk]/pev_.trkDxyError1[pev_.nTrk]) < 3.0;
+   bool etaLT1 = fabs(etrk.eta())<1;
+   bool nHitsGT12 = pev_.trkNHit[pev_.nTrk] > 12;
+   bool chi2PndofPnLayers = etrk.chi2()/etrk.ndof()/pev_.trkNlayer[pev_.nTrk] < 0.15; 
+   bool caloMatching  = (pev_.pfEcal[pev_.nParticle] + pev_.pfHcal[pev_.nParticle]) / (etrk.pt() * TMath::CosH(etrk.eta())) > 0.5  ||  etrk.pt()<20;
+
+   if(isHigherPt[0]) pev_.leadingTrackPt[0] = etrk.pt();//no cut
+   if(isHigherPt[1] && hp) pev_.leadingTrackPt[1] = etrk.pt();//highPurity
+   if(isHigherPt[2] && hp && ptErrorCut && DCAz && DCAxy) pev_.leadingTrackPt[2] = etrk.pt();//highPurity, DCA, pterror
+   if(isHigherPt[3] && hp && ptErrorCut && DCAz && DCAxy && nHitsGT12 && chi2PndofPnLayers && caloMatching) pev_.leadingTrackPt[3] = etrk.pt();//highPurity, DCA, pterror, nHits, chi2/ndof/nlayers
+   if(isHigherPt[4] && etaLT1) pev_.leadingTrackPt[4] = etrk.pt();//eta<1
+   if(isHigherPt[5] && hp && etaLT1) pev_.leadingTrackPt[5] = etrk.pt();//highPurity and eta<1
+   if(isHigherPt[6] && hp && ptErrorCut && DCAz && DCAxy && etaLT1) pev_.leadingTrackPt[6] = etrk.pt();//highPurity, DCA, pterror, eta<1
+   if(isHigherPt[7] && hp && ptErrorCut && DCAz && DCAxy && nHitsGT12 && chi2PndofPnLayers && caloMatching && etaLT1) pev_.leadingTrackPt[7] = etrk.pt();//highPurity, DCA, pterror,nhits,chi2/ndof/nlayer,eta<1
+  
+   pev_.nTrk++;
+
   }
+
 }
 
 //-------------- Fill mother particle info via the production vertex -----------------
@@ -928,6 +954,7 @@ TrackAnalyzer::beginJob()
   // vertex
   trackTree_->Branch("nVtx",&pev_.nVtx,"nVtx/I");
   trackTree_->Branch("nTrk",&pev_.nTrk,"nTrk/I");
+  trackTree_->Branch("leadingTrackPt",&pev_.leadingTrackPt,"leadingTrackPt[8]/F");
 
   trackTree_->Branch("maxPtVtx",&pev_.maxPtVtx,"maxPtVtx/I");
   trackTree_->Branch("maxMultVtx",&pev_.maxMultVtx,"maxMultVtx/I");
