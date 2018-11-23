@@ -166,12 +166,17 @@ process.load('HeavyIonsAnalysis.JetAnalysis.rechitanalyzer_cfi')
 process.rechitanalyzerpp.zdcRecHitSrc = cms.untracked.InputTag("QWzdcreco")
 
 ###############################################################################
+#Recover peripheral primary vertices
+#https://twiki.cern.ch/twiki/bin/view/CMS/HITracking2018PbPb#Peripheral%20Vertex%20Recovery
+process.load("RecoVertex.PrimaryVertexProducer.OfflinePrimaryVerticesRecovery_cfi")
+
 
 #########################
 # Main analysis list
 #########################
 
 process.ana_step = cms.Path(
+    process.offlinePrimaryVerticesRecovery +
     process.HiForest +
     process.hltanalysis +
     process.hltobject +
@@ -247,6 +252,10 @@ process.HBHENoiseFilterResultRun2Tight = cms.Path(process.fHBHENoiseFilterResult
 process.HBHEIsoNoiseFilterResult = cms.Path(process.fHBHEIsoNoiseFilterResult)
 
 process.pAna = cms.EndPath(process.skimanalysis)
+
+from HLTrigger.Configuration.CustomConfigs import MassReplaceInputTag
+process = MassReplaceInputTag(process,"offlinePrimaryVertices","offlinePrimaryVerticesRecovery")
+process.offlinePrimaryVerticesRecovery.oldVertexLabel = "offlinePrimaryVertices"
 
 ###############################################################################
 
