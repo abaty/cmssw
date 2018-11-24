@@ -4,7 +4,7 @@ ppTrack = cms.EDAnalyzer(
     'TrackAnalyzer',
     trackPtMin = cms.untracked.double(0.01),
     simTrackPtMin = cms.untracked.double(0.1),
-    vertexSrc = cms.vstring('offlinePrimaryVertices'),
+    vertexSrc = cms.VInputTag('offlinePrimaryVertices'),
     trackSrc = cms.InputTag('generalTracks'),
     mvaSrc = cms.InputTag("generalTracks","MVAValues"),
     particleSrc = cms.InputTag('genParticles'),

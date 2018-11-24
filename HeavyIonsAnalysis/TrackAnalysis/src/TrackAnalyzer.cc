@@ -343,7 +343,7 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
     associatorMapRS_ = consumes<reco::RecoToSimCollection>(iConfig.getParameter<edm::InputTag>("associatorMap"));
   }
 
-  std::vector<std::string> vertexSrcString_ = iConfig.getParameter<std::vector<std::string>>("vertexSrc");
+  std::vector<edm::InputTag> vertexSrcString_ = iConfig.getParameter<std::vector<edm::InputTag>>("vertexSrc");
   for (const auto& src : vertexSrcString_) {
     vertexSrc_.push_back(consumes<reco::VertexCollection>(edm::InputTag(src)));
   }
