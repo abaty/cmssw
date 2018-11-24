@@ -5,7 +5,7 @@ from HeavyIonsAnalysis.TrackAnalysis.trackAnalyzer_cfi import *
 anaTrack = ppTrack.clone(
     trackPtMin = 0.49,
     trackSrc = cms.InputTag("hiGeneralTracks"),
-    vertexSrc = cms.vstring('hiSelectedVertex'),
+    vertexSrc = cms.VInputTag('hiSelectedVertex'),
     mvaSrc = cms.InputTag('hiGeneralTracks','MVAVals'),
     pfCandSrc = cms.InputTag("particleFlowTmp"),
     doMVA = False   
