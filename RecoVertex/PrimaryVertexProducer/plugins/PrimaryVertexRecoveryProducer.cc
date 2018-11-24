@@ -156,6 +156,41 @@ PrimaryVertexRecoveryProducer::produce(edm::Event& iEvent, const edm::EventSetup
   edm::Handle<reco::TrackCollection> tks;
   iEvent.getByToken(trkToken, tks);
 
+  //check if we alreayd have a vertex
+  unsigned int nAlgosFound = 0;
+  for( std::vector <algo>::const_iterator algorithm=algorithms.begin(); algorithm!=algorithms.end(); algorithm++){
+    auto result = std::make_unique<reco::VertexCollection>();
+    reco::VertexCollection & vColl = (*result);
+  
+    if(!redoAllVertices){
+      //see if this event already has a vertex
+      const reco::VertexCollection* recoVertices;
+      edm::Handle< reco::VertexCollection > vtxs;
+      iEvent.getByToken(oldVtxToken, vtxs); 
+      recoVertices = vtxs.product();
+      if(recoVertices->size()!=0){
+        bool hasValid = false;
+        unsigned int maxNtrk = 0;
+        unsigned int biggestIndx = 0;
+        for(size_t i = 0; i < recoVertices->size(); ++i){
+          if(!((*recoVertices)[i].isFake())){
+            hasValid = true;
+            if((*recoVertices)[i].nTracks() > maxNtrk){
+              maxNtrk = (*recoVertices)[i].nTracks();
+              biggestIndx = i;
+            }
+          }
+        }
+        if(hasValid){
+          nAlgosFound++;
+          vColl.push_back((*recoVertices)[biggestIndx]);
+          iEvent.put(std::move(result), algorithm->label); 
+          continue;
+        }
+      }
+    }
+  }
+  if(nAlgosFound==algorithms.size()) return;
 
   // interface RECO tracks to vertex reconstruction
   edm::ESHandle<TransientTrackBuilder> theB;
@@ -191,33 +226,6 @@ PrimaryVertexRecoveryProducer::produce(edm::Event& iEvent, const edm::EventSetup
 
     auto result = std::make_unique<reco::VertexCollection>();
     reco::VertexCollection & vColl = (*result);
-  
-    if(!redoAllVertices){
-      //see if this event already has a vertex
-      const reco::VertexCollection* recoVertices;
-      edm::Handle< reco::VertexCollection > vtxs;
-      iEvent.getByToken(oldVtxToken, vtxs); 
-      recoVertices = vtxs.product();
-      if(recoVertices->size()!=0){
-        bool hasValid = false;
-        unsigned int maxNtrk = 0;
-        unsigned int biggestIndx = 0;
-        for(size_t i = 0; i < recoVertices->size(); ++i){
-          if(!((*recoVertices)[i].isFake())){
-            hasValid = true;
-            if((*recoVertices)[i].nTracks() > maxNtrk){
-              maxNtrk = (*recoVertices)[i].nTracks();
-              biggestIndx = i;
-            }
-          }
-        }
-        if(hasValid){
-          vColl.push_back((*recoVertices)[biggestIndx]);
-          iEvent.put(std::move(result), algorithm->label); 
-          continue;
-        }
-      }
-    }
 
     std::vector<TransientVertex> pvs;
     for (std::vector< std::vector<reco::TransientTrack> >::const_iterator iclus
