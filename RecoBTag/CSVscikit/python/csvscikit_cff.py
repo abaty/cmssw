@@ -1,0 +1,12 @@
+#csvsckit tagger
+
+from RecoBTag.CSVscikit.csvscikit_EventSetup_cff import *
+
+from RecoBTag.CSVscikit.pfInclusiveSecondaryVertexFinderCvsLTagInfos_cfi import *
+from RecoBTag.CSVscikit.pfInclusiveSecondaryVertexFinderNegativeCvsLTagInfos_cfi import *
+
+from RecoBTag.CSVscikit.pfCombinedSecondaryVertexSoftLeptonCvsLJetTags_cfi import *
+from RecoBTag.CSVscikit.pfNegativeCombinedSecondaryVertexSoftLeptonCvsLJetTags_cfi import *
+from RecoBTag.CSVscikit.pfPositiveCombinedSecondaryVertexSoftLeptonCvsLJetTags_cfi import *
+
+from RecoBTag.CSVscikit.csvscikitTagJetTags_cfi import * #EDProducer
