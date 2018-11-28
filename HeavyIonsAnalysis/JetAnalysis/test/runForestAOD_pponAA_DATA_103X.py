@@ -26,13 +26,13 @@ process.HiForest.HiForestVersion = cms.string(version)
 process.source = cms.Source("PoolSource",
     duplicateCheckMode = cms.untracked.string("noDuplicateCheck"),
     fileNames = cms.untracked.vstring(
-        "file:/eos/cms/store/hidata/HIRun2018A/HIMinimumBias0/AOD/PromptReco-v2/000/327/078/00000/7F80481A-9412-6444-8ED6-DF598F6D4F8E.root"
+        "file:/afs/cern.ch/work/r/rbi/public/forest/step2_t0streamer_RAW2DIGI_L1Reco_RECO.root"
         ),
     )
 
 # Number of events we want to process, -1 = all events
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(1)
     )
 
 ###############################################################################
