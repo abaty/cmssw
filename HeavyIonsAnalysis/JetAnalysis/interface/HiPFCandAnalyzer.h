@@ -16,7 +16,7 @@ class TreePFCandEventData
 {
   public:
     void SetTree(TTree * t) { tree_ = t; }
-    void SetBranches(bool doJets, bool doMC, bool doCaloEnergy);
+    void SetBranches(bool doJets, bool doMC, bool doCaloEnergy, bool doTrackMatching);
     void Clear();
 
     Int_t nPFpart_;
@@ -31,6 +31,12 @@ class TreePFCandEventData
     std::vector<Float_t> pfEcalEraw_;
     std::vector<Float_t> pfHcalE_;
     std::vector<Float_t> pfHcalEraw_;
+
+    std::vector<Int_t> trkAlgo_;
+    std::vector<Float_t> trkPtError_;
+    std::vector<Float_t> trkNHit_;
+    std::vector<Float_t> trkChi2_;
+    std::vector<Float_t> trkNdof_;
     
     Int_t nGENpart_;
     std::vector<Int_t> genPDGId_;
@@ -65,6 +71,7 @@ class HiPFCandAnalyzer : public edm::EDAnalyzer {
     edm::EDGetTokenT<reco::PFCandidateCollection> pfCandidatePF_;
     edm::EDGetTokenT<reco::GenParticleCollection> genLabel_;
     edm::EDGetTokenT<pat::JetCollection> jetLabel_;
+    edm::EDGetTokenT<reco::TrackCollection> trkLabel_;
 
     TreePFCandEventData pfEvt_;
     TTree *pfTree_;
@@ -79,4 +86,5 @@ class HiPFCandAnalyzer : public edm::EDAnalyzer {
     bool doMC_;
     bool doCaloEnergy_;
     bool skipCharged_;
+    bool doTrackMatching_;
 };

@@ -12,6 +12,9 @@
 
 #include "HeavyIonsAnalysis/JetAnalysis/interface/HiPFCandAnalyzer.h"
 
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+
+
 //
 // constructors and destructor
 //
@@ -39,6 +42,12 @@ HiPFCandAnalyzer::HiPFCandAnalyzer(const edm::ParameterSet& iConfig)
   doCaloEnergy_ = iConfig.getParameter<bool>("doCaloEnergy");
 
   skipCharged_ = iConfig.getParameter<bool>("skipCharged");
+  
+  doTrackMatching_ = iConfig.getParameter<bool>("doTrackMatching");
+  if (doTrackMatching_) {
+    trkLabel_ = consumes<reco::TrackCollection>(
+      iConfig.getParameter<edm::InputTag>("trackLabel"));
+  }
 }
 
 HiPFCandAnalyzer::~HiPFCandAnalyzer()
@@ -59,6 +68,11 @@ HiPFCandAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   edm::Handle<reco::PFCandidateCollection> pfCandidates;
   iEvent.getByToken(pfCandidatePF_, pfCandidates);
+
+  edm::Handle<reco::TrackCollection > tracks;
+  if (doTrackMatching_) {
+    iEvent.getByToken(trkLabel_, tracks);
+  }
 
   for (const auto& pfcand : *pfCandidates) {
     double pt = pfcand.pt();
@@ -85,6 +99,49 @@ HiPFCandAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     }
     
     pfEvt_.nPFpart_++;
+
+    if(doTrackMatching_){
+      // only charged hadrons and leptons can be asscociated with a track
+      int type = pfcand.particleId();
+      if(!(type == reco::PFCandidate::h ||     //type1
+	 type == reco::PFCandidate::e ||     //type2
+	 type == reco::PFCandidate::mu      //type3
+	 )
+      ){
+        pfEvt_.trkAlgo_.push_back( -999 );  
+        pfEvt_.trkPtError_.push_back( -999 );  
+        pfEvt_.trkNHit_.push_back( -999 );  
+        pfEvt_.trkChi2_.push_back( 0 );  
+        pfEvt_.trkNdof_.push_back( -999 );  
+        continue;
+      }
+
+      //find the track key
+      unsigned int trackKey = pfcand.trackRef().key();     
+
+      //loop through tracks looking for this key 
+      for(unsigned int it=0; it<tracks->size(); ++it){
+        //if these are matched...
+        if(trackKey == it){
+          const reco::Track & trk = (*tracks)[it];
+          pfEvt_.trkAlgo_.push_back( trk.algo() );  
+          pfEvt_.trkPtError_.push_back( trk.ptError() );  
+          pfEvt_.trkNHit_.push_back( trk.numberOfValidHits() );  
+          pfEvt_.trkChi2_.push_back( trk.chi2() );  
+          pfEvt_.trkNdof_.push_back( trk.ndof() );  
+          break;
+        }
+        
+        //if we didn't find a match...
+        if( it == tracks->size()-1){
+          pfEvt_.trkAlgo_.push_back( -999 );  
+          pfEvt_.trkPtError_.push_back( -999 );  
+          pfEvt_.trkNHit_.push_back( -999 );  
+          pfEvt_.trkChi2_.push_back( 0 );  
+          pfEvt_.trkNdof_.push_back( -999 );  
+        }
+      }
+    }
   }
 
   // Fill GEN info
@@ -132,7 +189,7 @@ void HiPFCandAnalyzer::beginJob()
 {
   pfTree_ = fs->make<TTree>("pfTree", "pf candidate tree");
   pfEvt_.SetTree(pfTree_);
-  pfEvt_.SetBranches(doJets_, doMC_, doCaloEnergy_);
+  pfEvt_.SetBranches(doJets_, doMC_, doCaloEnergy_, doTrackMatching_);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
@@ -141,7 +198,7 @@ HiPFCandAnalyzer::endJob() {
 }
 
 // set branches
-void TreePFCandEventData::SetBranches(bool doJets, bool doMC, bool doCaloEnergy)
+void TreePFCandEventData::SetBranches(bool doJets, bool doMC, bool doCaloEnergy, bool doTrackMatching)
 {
   // -- particle info --
   tree_->Branch("nPFpart", &nPFpart_, "nPFpart/I");
@@ -158,6 +215,14 @@ void TreePFCandEventData::SetBranches(bool doJets, bool doMC, bool doCaloEnergy)
     tree_->Branch("pfEcalEraw", &pfEcalEraw_);
     tree_->Branch("pfHcalE", &pfHcalE_);
     tree_->Branch("pfHcalEraw", &pfHcalEraw_);
+  }
+
+  if(doTrackMatching) {
+    tree_->Branch("trkAlgo",&trkAlgo_);
+    tree_->Branch("trkPtError",&trkPtError_);
+    tree_->Branch("trkNHit",&trkNHit_);
+    tree_->Branch("trkChi2",&trkChi2_);
+    tree_->Branch("trkNdof",&trkNdof_);
   }
 
   // -- jet info --
@@ -192,6 +257,12 @@ void TreePFCandEventData::Clear()
   pfEcalEraw_.clear();
   pfHcalE_.clear();
   pfHcalEraw_.clear();
+
+  trkAlgo_.clear();
+  trkPtError_.clear();
+  trkNHit_.clear();
+  trkChi2_.clear();
+  trkNdof_.clear();  
 
   nGENpart_ = 0;
   genPDGId_.clear();

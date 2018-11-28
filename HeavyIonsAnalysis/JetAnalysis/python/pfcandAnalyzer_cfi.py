@@ -13,6 +13,9 @@ pfcandAnalyzer = cms.EDAnalyzer(
     doJets           = cms.bool(False),
     doCaloEnergy     = cms.bool(True),
     skipCharged      = cms.bool(False),
+  
+    doTrackMatching  = cms.bool(False),
+    trackLabel       = cms.InputTag("generalTracks")
     )
 
 pfcandAnalyzerCS = pfcandAnalyzer.clone(
