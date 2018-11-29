@@ -119,27 +119,20 @@ HiPFCandAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       //find the track key
       unsigned int trackKey = pfcand.trackRef().key();     
 
-      //loop through tracks looking for this key 
-      for(unsigned int it=0; it<tracks->size(); ++it){
-        //if these are matched...
-        if(trackKey == it){
-          const reco::Track & trk = (*tracks)[it];
+      if(trackKey < tracks->size()){
+          const reco::Track & trk = (*tracks)[trackKey];
           pfEvt_.trkAlgo_.push_back( trk.algo() );  
           pfEvt_.trkPtError_.push_back( trk.ptError() );  
           pfEvt_.trkNHit_.push_back( trk.numberOfValidHits() );  
           pfEvt_.trkChi2_.push_back( trk.chi2() );  
           pfEvt_.trkNdof_.push_back( trk.ndof() );  
-          break;
-        }
-        
-        //if we didn't find a match...
-        if( it == tracks->size()-1){
-          pfEvt_.trkAlgo_.push_back( -999 );  
-          pfEvt_.trkPtError_.push_back( -999 );  
-          pfEvt_.trkNHit_.push_back( -999 );  
-          pfEvt_.trkChi2_.push_back( 0 );  
-          pfEvt_.trkNdof_.push_back( -999 );  
-        }
+      }
+      else{
+        pfEvt_.trkAlgo_.push_back( -999 );  
+        pfEvt_.trkPtError_.push_back( -999 );  
+        pfEvt_.trkNHit_.push_back( -999 );  
+        pfEvt_.trkChi2_.push_back( 0 );  
+        pfEvt_.trkNdof_.push_back( -999 );  
       }
     }
   }

@@ -32,7 +32,7 @@ process.source = cms.Source("PoolSource",
 
 # Number of events we want to process, -1 = all events
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1)
+    input = cms.untracked.int32(10)
     )
 
 ###############################################################################
@@ -94,7 +94,6 @@ process.akPu4PFJets.jetPtMin = 1
 process.load('HeavyIonsAnalysis.JetAnalysis.hiFJRhoAnalyzer_cff')
 process.load("HeavyIonsAnalysis.JetAnalysis.pfcandAnalyzer_cfi")
 process.pfcandAnalyzer.doTrackMatching  = cms.bool(True)
-process.pfcandAnalyzerCS.doTrackMatching  = cms.bool(True)
 
 ###############################################################################
 
