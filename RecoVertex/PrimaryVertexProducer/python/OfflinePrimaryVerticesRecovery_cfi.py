@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+from TrackingTools.TransientTrack.TransientTrackBuilder_cfi import *
 
 offlinePrimaryVerticesRecovery = cms.EDProducer(
     "PrimaryVertexRecoveryProducer",
