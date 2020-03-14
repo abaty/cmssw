@@ -69,6 +69,7 @@ akCs4PFJets = cms.EDProducer(
     etaMap    = cms.InputTag('hiFJRhoProducer','mapEtaEdges'),
     rho       = cms.InputTag('hiFJRhoProducer','mapToRho'),
     rhom      = cms.InputTag('hiFJRhoProducer','mapToRhoM'),
+    useModulatedRho = cms.bool(False),
     csRParam  = cms.double(-1.),
     csAlpha   = cms.double(2.),
     writeJetsWithConst = cms.bool(True),

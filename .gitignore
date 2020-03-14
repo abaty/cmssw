@@ -4,3 +4,6 @@ __init__.py
 .#*
 #*#
 *~
+
+# heavy ion specific
+HeavyIonsAnalysis/JetAnalysis/python/jets/ak*JetSequence_*_*_cff.py
