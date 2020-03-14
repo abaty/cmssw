@@ -174,6 +174,7 @@ process.load('HeavyIonsAnalysis.JetAnalysis.rechitanalyzer_cfi')
 #Recover peripheral primary vertices
 #https://twiki.cern.ch/twiki/bin/view/CMS/HITracking2018PbPb#Peripheral%20Vertex%20Recovery
 process.load("RecoVertex.PrimaryVertexProducer.OfflinePrimaryVerticesRecovery_cfi")
+process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 
 #########################
 # Main analysis list
