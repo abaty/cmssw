@@ -110,6 +110,8 @@ process.TFileService = cms.Service("TFileService",
 ################################
 
 # tracks
+process.load("HeavyIonsAnalysis.TrackAnalysis.TrackAnalyzers_cff")
+
 
 ################################
 
@@ -119,7 +121,8 @@ process.TFileService = cms.Service("TFileService",
 
 # main forest sequence
 process.forest = cms.Path(
-    process.HiForestInfo
+    process.HiForestInfo +
+    process.trackSequencePbPb 
     )
 
 ###############################################################################
