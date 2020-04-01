@@ -98,6 +98,9 @@ process.TFileService = cms.Service("TFileService",
 ################################
 
 # electrons, photons, muons
+process.load('HeavyIonsAnalysis.EGMAnalysis.ggHiNtuplizer_cfi')
+
+process.load("TrackingTools.TransientTrack.TransientTrackBuilder_cfi")
 
 ################################
 
@@ -122,7 +125,8 @@ process.load("HeavyIonsAnalysis.TrackAnalysis.TrackAnalyzers_cff")
 # main forest sequence
 process.forest = cms.Path(
     process.HiForestInfo +
-    process.trackSequencePbPb 
+    process.trackSequencePbPb +
+    process.ggHiNtuplizer
     )
 
 ###############################################################################
