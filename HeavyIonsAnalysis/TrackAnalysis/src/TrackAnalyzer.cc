@@ -12,6 +12,9 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
   packedCandLabel_ = iConfig.getParameter<edm::InputTag>("packedCandSrc");
   packedCandSrc_ = consumes<pat::PackedCandidateCollection>(packedCandLabel_);
   
+  lostTracksLabel_ = iConfig.getParameter<edm::InputTag>("lostTracksSrc");
+  lostTracksSrc_ = consumes<pat::PackedCandidateCollection>(lostTracksLabel_);
+  
   beamSpotProducer_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc",edm::InputTag("offlineBeamSpot")));
 }
 
@@ -73,23 +76,51 @@ void TrackAnalyzer::fillVertices(const edm::Event& iEvent) {
 void
 TrackAnalyzer::fillTracks(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   edm::Handle<std::vector<pat::PackedCandidate>> cands;
-  iEvent.getByToken(packedCandSrc_,cands);
-  for(unsigned it = 0; it<cands->size(); ++it){
-    const pat::PackedCandidate & c = (*cands)[it];
 
-    if(!c.hasTrackDetails()) continue;
+  //loop over packed cands, then loop over lost tracks
+  for(int i = 0; i<2; i++){
 
-    reco::Track t = c.pseudoTrack();
-    trkPt.push_back( t.pt() );
-    trkPtError.push_back( t.ptError() );
-    trkEta.push_back( t.eta() );
-    trkPhi.push_back( t.phi() );
-    trkCharge.push_back( (char) t.charge() );
-    trkPDGId.push_back( c.pdgId() );
-    trkNHits.push_back( (char) t.numberOfValidHits() );
-    trkNPixHits.push_back( (char) t.hitPattern().numberOfValidPixelHits() );
-    trkNLayers.push_back( (char) t.hitPattern().trackerLayersWithMeasurement() );
-    highPurity.push_back( t.quality(reco::TrackBase::qualityByName("highPurity")));
+    if(i==0) iEvent.getByToken(packedCandSrc_,cands);
+    if(i==1) iEvent.getByToken(lostTracksSrc_,cands);
+
+    for(unsigned it = 0; it<cands->size(); ++it){
+      const pat::PackedCandidate & c = (*cands)[it];
+
+      if(!c.hasTrackDetails()) continue;
+
+      reco::Track t = c.pseudoTrack();
+
+      if(t.pt() < trackPtMin_) continue;
+
+      trkPt.push_back( t.pt() );
+      trkPtError.push_back( t.ptError() );
+      trkEta.push_back( t.eta() );
+      trkPhi.push_back( t.phi() );
+      trkCharge.push_back( (char) t.charge() );
+      trkPDGId.push_back( c.pdgId() );
+      trkNHits.push_back( (char) t.numberOfValidHits() );
+      trkNPixHits.push_back( (char) t.hitPattern().numberOfValidPixelHits() );
+      trkNLayers.push_back( (char) t.hitPattern().trackerLayersWithMeasurement() );
+      highPurity.push_back( t.quality(reco::TrackBase::qualityByName("highPurity")));
+
+      //DCA info for associated vtx
+      trkAssociatedVtxIndx.push_back( c.vertexRef().key() );
+      trkAssociatedVtxQuality.push_back( c.fromPV(c.vertexRef().key() ));
+      trkDzAssociatedVtx.push_back( c.dz( c.vertexRef()->position() ) );
+      trkDzErrAssociatedVtx.push_back( sqrt( c.dzError()*c.dzError() + c.vertexRef()->zError() * c.vertexRef()->zError() ) );
+      trkDxyAssociatedVtx.push_back( c.dxy( c.vertexRef()->position() ) );
+      trkDxyErrAssociatedVtx.push_back( sqrt( c.dxyError()*c.dxyError() + c.vertexRef()->xError() * c.vertexRef()->yError() ) );
+   
+      //DCA info for first (highest pt) vtx
+      if( xVtx.size()>0 ){
+        math::XYZPoint v(xVtx.at(0),yVtx.at(0), zVtx.at(0));   
+        trkFirstVtxQuality.push_back( c.fromPV( 0 ));
+        trkDzFirstVtx.push_back( c.dz( v ) );
+        trkDzErrFirstVtx.push_back( sqrt( c.dzError()*c.dzError() + zErrVtx.at(0) * zErrVtx.at(0) ) );
+        trkDxyFirstVtx.push_back( c.dxy( v ) );
+        trkDxyErrFirstVtx.push_back( sqrt( c.dxyError()*c.dxyError() + xErrVtx.at(0) * yErrVtx.at(0) ) );
+      }
+    }
   }
 }
 
@@ -128,6 +159,17 @@ void TrackAnalyzer::beginJob()
   trackTree_->Branch("trkNPixHits",&trkNPixHits);
   trackTree_->Branch("trkNLayers",&trkNLayers);
   trackTree_->Branch("highPurity",&highPurity);
+  trackTree_->Branch("trkAssociatedVtxIndx",&trkAssociatedVtxIndx);
+  trackTree_->Branch("trkAssociatedVtxQuality",&trkAssociatedVtxQuality);
+  trackTree_->Branch("trkDzAssociatedVtx",&trkDzAssociatedVtx);
+  trackTree_->Branch("trkDzErrAssociatedVtx",&trkDzErrAssociatedVtx);
+  trackTree_->Branch("trkDxyAssociatedVtx",&trkDxyAssociatedVtx);
+  trackTree_->Branch("trkDxyErrAssociatedVtx",&trkDxyErrAssociatedVtx);
+  trackTree_->Branch("trkFirstVtxQuality",&trkFirstVtxQuality);
+  trackTree_->Branch("trkDzFirstVtx",&trkDzFirstVtx);
+  trackTree_->Branch("trkDzErrFirstVtx",&trkDzErrFirstVtx);
+  trackTree_->Branch("trkDxyFirstVtx",&trkDxyFirstVtx);
+  trackTree_->Branch("trkDxyErrFirstVtx",&trkDxyErrFirstVtx);
 }
 
 // ------------ method called once each job just after ending the event loop  ------------

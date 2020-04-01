@@ -5,5 +5,6 @@ trackAnalyzer = cms.EDAnalyzer('TrackAnalyzer',
     trackPtMin = cms.untracked.double(0.01),
     vertexSrc = cms.InputTag("unpackedTracksAndVertices"),
     packedCandSrc = cms.InputTag("packedPFCandidates"),
+    lostTracksSrc = cms.InputTag("lostTracks"),
     beamSpotSrc = cms.untracked.InputTag('offlineBeamSpot')
 )

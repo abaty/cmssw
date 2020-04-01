@@ -76,6 +76,9 @@ class TrackAnalyzer : public edm::EDAnalyzer {
 
      edm::InputTag packedCandLabel_;
      edm::EDGetTokenT<pat::PackedCandidateCollection> packedCandSrc_;
+     
+     edm::InputTag lostTracksLabel_;
+     edm::EDGetTokenT<pat::PackedCandidateCollection> lostTracksSrc_;
 
      edm::EDGetTokenT<reco::BeamSpot> beamSpotProducer_;
 
@@ -111,6 +114,19 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      std::vector< char > trkNPixHits;
      std::vector< char > trkNLayers;
      std::vector< bool > highPurity;
+
+     std::vector< int > trkAssociatedVtxIndx;
+     std::vector< int > trkAssociatedVtxQuality;
+     std::vector< float > trkDzAssociatedVtx;
+     std::vector< float > trkDzErrAssociatedVtx;
+     std::vector< float > trkDxyAssociatedVtx;
+     std::vector< float > trkDxyErrAssociatedVtx;
+     
+     std::vector< int > trkFirstVtxQuality;
+     std::vector< float > trkDzFirstVtx;
+     std::vector< float > trkDzErrFirstVtx;
+     std::vector< float > trkDxyFirstVtx;
+     std::vector< float > trkDxyErrFirstVtx;
 };
 
 void TrackAnalyzer::clearVectors(){
@@ -136,6 +152,19 @@ void TrackAnalyzer::clearVectors(){
   trkNPixHits.clear();
   trkNLayers.clear();
   highPurity.clear();
+
+  trkAssociatedVtxIndx.clear();
+  trkAssociatedVtxQuality.clear();
+  trkDzAssociatedVtx.clear();
+  trkDzErrAssociatedVtx.clear();
+  trkDxyAssociatedVtx.clear();
+  trkDxyErrAssociatedVtx.clear();
+  
+  trkFirstVtxQuality.clear();
+  trkDzFirstVtx.clear();
+  trkDzErrFirstVtx.clear();
+  trkDxyFirstVtx.clear();
+  trkDxyErrFirstVtx.clear();
 }
 
 #endif     
