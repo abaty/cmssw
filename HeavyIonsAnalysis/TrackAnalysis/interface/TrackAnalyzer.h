@@ -39,6 +39,7 @@
 #include "SimGeneral/HepPDTRecord/interface/ParticleDataTable.h"
 #include "SimTracker/Records/interface/TrackAssociatorRecord.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 // Particle Flow
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
@@ -56,12 +57,12 @@ class TrackAnalyzer : public edm::EDAnalyzer {
 
   public:
     explicit TrackAnalyzer(const edm::ParameterSet&);
-    ~TrackAnalyzer() override;
+    ~TrackAnalyzer();
 
   private:
-    void beginJob() override;
-    void analyze(const edm::Event&, const edm::EventSetup&) override;
-    void endJob() override;
+    virtual void beginJob();
+    virtual void analyze(const edm::Event&, const edm::EventSetup&);
+    virtual void endJob();
 
     void fillVertices(const edm::Event& iEvent);
     void fillTracks(const edm::Event& iEvent, const edm::EventSetup& iSetup);
@@ -75,12 +76,17 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
 
      edm::InputTag packedCandLabel_;
-     edm::EDGetTokenT<pat::PackedCandidateCollection> packedCandSrc_;
+     edm::EDGetTokenT<edm::View<pat::PackedCandidate>> packedCandSrc_;
      
      edm::InputTag lostTracksLabel_;
-     edm::EDGetTokenT<pat::PackedCandidateCollection> lostTracksSrc_;
+     edm::EDGetTokenT<edm::View<pat::PackedCandidate>> lostTracksSrc_;
 
      edm::EDGetTokenT<reco::BeamSpot> beamSpotProducer_;
+
+     edm::InputTag chi2MapLabel_;
+     edm::EDGetTokenT<edm::ValueMap<float>> chi2Map_;
+     edm::InputTag chi2MapLostLabel_;
+     edm::EDGetTokenT<edm::ValueMap<float>> chi2MapLost_;
 
      edm::Service<TFileService> fs;
  
@@ -114,6 +120,7 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      std::vector< char > trkNPixHits;
      std::vector< char > trkNLayers;
      std::vector< bool > highPurity;
+     std::vector< float > trkNormChi2;
 
      std::vector< int > trkAssociatedVtxIndx;
      std::vector< int > trkAssociatedVtxQuality;
@@ -151,6 +158,7 @@ void TrackAnalyzer::clearVectors(){
   trkNHits.clear();
   trkNPixHits.clear();
   trkNLayers.clear();
+  trkNormChi2.clear();
   highPurity.clear();
 
   trkAssociatedVtxIndx.clear();
