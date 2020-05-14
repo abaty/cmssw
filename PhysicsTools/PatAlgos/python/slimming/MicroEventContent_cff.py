@@ -154,6 +154,7 @@ _pp_on_AA_2018_extraCommands = [
     'keep QIE10DataFrameHcalDataFrameContainer_hcalDigis_ZDC_*',
     'keep CrossingFramePlaybackInfoNew_mix_*_*',
     'keep booledmValueMap_*MuonID_*_*',
+    'keep floatedmValueMap_*TrackChi2_*_*',
     'keep patPackedCandidates_hipixeltracks_*_*',
     'drop *_slimmedJetsAK8_*_*',
     'drop *_slimmedJetsAK8PFPuppiSoftDropPacked_SubJets_*',

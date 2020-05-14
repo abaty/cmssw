@@ -58,7 +58,9 @@ from Configuration.Eras.Modifier_pp_on_AA_2018_cff import pp_on_AA_2018
 pp_on_AA_2018.toReplaceWith(slimmingTask, slimmingTask.copyAndExclude([slimmedOOTPhotons]))
 
 from PhysicsTools.PatAlgos.packedPFCandidateMuonID_cfi import packedPFCandidateMuonID
+from PhysicsTools.PatAlgos.packedPFCandidateTrackChi2_cfi import packedPFCandidateTrackChi2
 from RecoHI.HiTracking.hipixeltracks_miniAOD_cfi import hipixeltracks
 pp_on_AA_2018.toModify(packedPFCandidateMuonID, muonSelectors = cms.vstring(["AllTrackerMuons", "TMOneStationTight"]))
 lostTrackMuonID = packedPFCandidateMuonID.clone(candidates = cms.InputTag("lostTracks"))
-pp_on_AA_2018.toReplaceWith(slimmingTask, cms.Task(slimmingTask.copy(), packedPFCandidateMuonID, lostTrackMuonID, hipixeltracks))
+lostTrackChi2 = packedPFCandidateTrackChi2.clone(candidates = cms.InputTag("lostTracks"))
+pp_on_AA_2018.toReplaceWith(slimmingTask, cms.Task(slimmingTask.copy(), packedPFCandidateMuonID, lostTrackMuonID, packedPFCandidateTrackChi2 , lostTrackChi2, hipixeltracks))
