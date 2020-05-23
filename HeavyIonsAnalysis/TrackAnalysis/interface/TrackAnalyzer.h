@@ -57,12 +57,12 @@ class TrackAnalyzer : public edm::EDAnalyzer {
 
   public:
     explicit TrackAnalyzer(const edm::ParameterSet&);
-    ~TrackAnalyzer();
+    ~TrackAnalyzer() override;
 
   private:
-    virtual void beginJob();
-    virtual void analyze(const edm::Event&, const edm::EventSetup&);
-    virtual void endJob();
+    void beginJob() override;
+    void analyze(const edm::Event&, const edm::EventSetup&) override;
+    void endJob() override;
 
     void fillVertices(const edm::Event& iEvent);
     void fillTracks(const edm::Event& iEvent, const edm::EventSetup& iSetup);
