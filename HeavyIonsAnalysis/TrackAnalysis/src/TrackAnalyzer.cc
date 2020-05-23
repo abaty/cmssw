@@ -102,7 +102,7 @@ TrackAnalyzer::fillTracks(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
       if(!c.hasTrackDetails()) continue;
 
-      reco::Track t = c.pseudoTrack();
+      reco::Track const& t = c.pseudoTrack();
 
       if(t.pt() < trackPtMin_) continue;
 
@@ -127,7 +127,7 @@ TrackAnalyzer::fillTracks(const edm::Event& iEvent, const edm::EventSetup& iSetu
       trkDxyErrAssociatedVtx.push_back( sqrt( c.dxyError()*c.dxyError() + c.vertexRef()->xError() * c.vertexRef()->yError() ) );
    
       //DCA info for first (highest pt) vtx
-      if( xVtx.size()>0 ){
+      if( !xVtx.empty() ){
         math::XYZPoint v(xVtx.at(0),yVtx.at(0), zVtx.at(0));   
         trkFirstVtxQuality.push_back( c.fromPV( 0 ));
         trkDzFirstVtx.push_back( c.dz( v ) );
