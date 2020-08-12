@@ -42,10 +42,10 @@ MeasurementTrackerEvent::MeasurementTrackerEvent(const MeasurementTrackerEvent &
      theOwner(false)
 {
     //std::cout << "Creatign non-owned MT @ " << this << " from @ " << & trackerEvent << " (strip data @ " << trackerEvent.theStripData << ")" << std::endl;
-    if (stripClustersToSkip.refProd().id() != theStripData->handle().id() ){
-        edm::LogError("ProductIdMismatch")<<"The strip masking does not point to the strip collection of clusters: "<<stripClustersToSkip.refProd().id()<<"!="<<  theStripData->handle().id();
-        throw cms::Exception("Configuration")<<"The strip masking does not point to the strip collection of clusters: "<<stripClustersToSkip.refProd().id()<<"!="<< theStripData->handle().id()<< "\n";
-    }
+//    if (stripClustersToSkip.refProd().id() != theStripData->handle().id() ){
+//        edm::LogError("ProductIdMismatch")<<"The strip masking does not point to the strip collection of clusters: "<<stripClustersToSkip.refProd().id()<<"!="<<  theStripData->handle().id();
+//        throw cms::Exception("Configuration")<<"The strip masking does not point to the strip collection of clusters: "<<stripClustersToSkip.refProd().id()<<"!="<< theStripData->handle().id()<< "\n";
+//    }
 
     if (pixelClustersToSkip.refProd().id() != thePixelData->handle().id()){
         edm::LogError("ProductIdMismatch")<<"The pixel masking does not point to the proper collection of clusters: "<<pixelClustersToSkip.refProd().id()<<"!="<<thePixelData->handle().id();

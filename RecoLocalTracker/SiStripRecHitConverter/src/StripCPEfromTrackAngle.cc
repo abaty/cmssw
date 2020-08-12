@@ -118,7 +118,8 @@ StripCPEfromTrackAngle::localParameters( const SiStripCluster& cluster, AlgoPara
     uerr2 = legacyStripErrorSquared(N,afp);
     break;
   case Algo::mergeCK :
-    uerr2 = cluster.isMerged() ? legacyStripErrorSquared(N,afp) : stripErrorSquared( N, afp,loc );
+    //uerr2 = cluster.isMerged() ? legacyStripErrorSquared(N,afp) : stripErrorSquared( N, afp,loc );
+    uerr2 = stripErrorSquared( N, afp,loc );
     break;
   }
   
@@ -135,5 +136,50 @@ StripCPEfromTrackAngle::localParameters( const SiStripCluster& cluster, const Ge
   
   auto const & par = getAlgoParam(det,ltp);
   return localParameters(cluster,par);
+}
+
+StripClusterParameterEstimator::LocalValues
+	StripCPEfromTrackAngle::approxlocalParameters( const SiStripApproximateClusterv2& cluster, AlgoParam const & par) const {
+	  auto const & p = par.p;
+	  auto const & ltp = par.ltp;
+	  auto loc = par.loc;
+	  auto corr = par.corr;
+	  auto afp = par.afullProjection;
+
+	  float uerr2=0;
+	  
+	  auto N = cluster.width();
+
+	  switch (m_algo) {
+	  case Algo::chargeCK :
+	    {
+	      //what do we do about this?
+	      //auto dQdx = siStripClusterTools::chargePerCM(cluster, ltp, p.invThickness);
+	      //uerr2 = dQdx > maxChgOneMIP ? legacyStripErrorSquared(N,afp) : stripErrorSquared( N, afp,loc );
+	      uerr2 = stripErrorSquared( N, afp,loc );
+	    }
+	    break;
+	  case Algo::legacy :
+	    uerr2 = legacyStripErrorSquared(N,afp);
+	    break;
+	  case Algo::mergeCK :
+	    //uerr2 = cluster.isMerged() ? legacyStripErrorSquared(N,afp) : stripErrorSquared( N, afp,loc );
+	    uerr2 = stripErrorSquared( N, afp,loc );
+	    break;
+	  }
+	  
+	  const float strip = cluster.barycenter() + corr;
+	  
+	  return std::make_pair( p.topology->localPosition(strip, ltp.vector()),
+			 p.topology->localError(strip, uerr2, ltp.vector()) );
+}
+
+  
+
+StripClusterParameterEstimator::LocalValues 
+StripCPEfromTrackAngle::approxlocalParameters( const SiStripApproximateClusterv2& cluster, const GeomDetUnit& det, const LocalTrajectoryParameters& ltp) const {
+  
+  auto const & par = getAlgoParam(det,ltp);
+  return approxlocalParameters(cluster,par);
 }
 

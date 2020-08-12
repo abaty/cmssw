@@ -2,7 +2,7 @@
 #define RecoLocalTracker_SiStripRecHitConverter_StripCPE_H
 
 #include "RecoLocalTracker/ClusterParameterEstimator/interface/StripClusterParameterEstimator.h"
-
+#include "DataFormats/SiStripApproximateClusterv2/interface/SiStripApproximateClusterv2.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
@@ -18,8 +18,10 @@ class StripCPE : public StripClusterParameterEstimator
 {
 public:
   using StripClusterParameterEstimator::localParameters;
+  using StripClusterParameterEstimator::approxlocalParameters;
 
   StripClusterParameterEstimator::LocalValues localParameters( const SiStripCluster& cl, const GeomDetUnit&) const override;
+  StripClusterParameterEstimator::LocalValues approxlocalParameters( const SiStripApproximateClusterv2& cl, const GeomDetUnit&) const override;
   
   StripCPE( edm::ParameterSet & conf, 
 	    const MagneticField&, 
@@ -50,6 +52,10 @@ public:
 
   virtual StripClusterParameterEstimator::LocalValues
   localParameters( const SiStripCluster& cl, AlgoParam const & ap) const {
+    return std::make_pair(LocalPoint(), LocalError());
+  }
+  virtual StripClusterParameterEstimator::LocalValues
+  approxlocalParameters( const SiStripApproximateClusterv2& cl, AlgoParam const & ap) const {
     return std::make_pair(LocalPoint(), LocalError());
   }
   

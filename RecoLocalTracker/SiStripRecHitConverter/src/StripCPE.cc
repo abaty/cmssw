@@ -2,6 +2,7 @@
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 #include "Geometry/CommonTopologies/interface/TkRadialStripTopology.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetType.h"
+#include "DataFormats/SiStripApproximateClusterv2/interface/SiStripApproximateClusterv2.h"
 #include "boost/bind.hpp"
 #include "boost/lambda/lambda.hpp"
 #include <algorithm>
@@ -63,6 +64,17 @@ StripCPE::StripCPE( edm::ParameterSet & conf,
 
 StripClusterParameterEstimator::LocalValues StripCPE::
 localParameters( const SiStripCluster& cluster, const GeomDetUnit& det) const {
+  StripCPE::Param const & p = param(det);
+  const float barycenter = cluster.barycenter();
+  const float fullProjection = p.coveredStrips( p.drift + LocalVector(0,0,-p.thickness), p.topology->localPosition(barycenter));
+  const float strip = barycenter - 0.5f * (1.f-p.backplanecorrection) * fullProjection;
+
+  return std::make_pair( p.topology->localPosition(strip),
+			 p.topology->localError(strip, 1.f/12.f) );
+}
+
+StripClusterParameterEstimator::LocalValues StripCPE::
+approxlocalParameters( const SiStripApproximateClusterv2& cluster, const GeomDetUnit& det) const {
   StripCPE::Param const & p = param(det);
   const float barycenter = cluster.barycenter();
   const float fullProjection = p.coveredStrips( p.drift + LocalVector(0,0,-p.thickness), p.topology->localPosition(barycenter));

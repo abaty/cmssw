@@ -1,0 +1,20 @@
+<lcgdict>
+
+ <class name="SiStripApproximateClusterv2"/>
+ <class name="edmNew::DetSetVector<SiStripApproximateClusterv2>"/>
+ <class name="edm::Wrapper<edmNew::DetSetVector<SiStripApproximateClusterv2>>"/>
+ 
+ <class name="std::vector<SiStripApproximateClusterv2>"/>
+
+ <class name="edm::Ref<edmNew::DetSetVector<SiStripApproximateClusterv2>, SiStripApproximateClusterv2, edmNew::DetSetVector<SiStripApproximateClusterv2>::FindForDetSetVector>"/>
+
+
+ <class name="edm::ContainerMask<edmNew::DetSetVector<SiStripApproximateClusterv2> >"/>
+ <class name="edm::Wrapper<edm::ContainerMask<edmNew::DetSetVector<SiStripApproximateClusterv2> > >"/>
+
+
+ <class name="std::vector<edm::Ref<edmNew::DetSetVector<SiStripApproximateClusterv2>,SiStripApproximateClusterv2,edmNew::DetSetVector<SiStripApproximateClusterv2>::FindForDetSetVector> >" />
+ <class name="edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<SiStripApproximateClusterv2>,SiStripApproximateClusterv2,edmNew::DetSetVector<SiStripApproximateClusterv2>::FindForDetSetVector> >" />
+ <class name="edm::Wrapper<edmNew::DetSetVector<edm::Ref<edmNew::DetSetVector<SiStripApproximateClusterv2>,SiStripApproximateClusterv2,edmNew::DetSetVector<SiStripApproximateClusterv2>::FindForDetSetVector> > >" />
+
+</lcgdict>

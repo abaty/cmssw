@@ -4,6 +4,7 @@
 #include "DataFormats/Common/interface/RefCoreWithIndex.h"
 
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
+#include "DataFormats/SiStripApproximateClusterv2/interface/SiStripApproximateClusterv2.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
@@ -23,11 +24,13 @@ class OmniClusterRef {
 public:
   typedef edm::Ref<edmNew::DetSetVector<SiPixelCluster>,SiPixelCluster > ClusterPixelRef;
   typedef edm::Ref<edmNew::DetSetVector<SiStripCluster>,SiStripCluster > ClusterStripRef;
+  typedef edm::Ref<edmNew::DetSetVector<SiStripApproximateClusterv2>,SiStripApproximateClusterv2 > ApproximateClusterStripRef;
   typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2Cluster1DRef;
   
   OmniClusterRef() : me(edm::RefCore(),kInvalid) {}
   explicit OmniClusterRef(ClusterPixelRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? ref.key()                  | (subClus<<subClusShift) : kInvalid) ){  }
   explicit OmniClusterRef(ClusterStripRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? (ref.key()   | kIsStrip  ) | (subClus<<subClusShift) : kInvalid) ){ }
+  explicit OmniClusterRef(ApproximateClusterStripRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? (ref.key()   | kIsStrip  ) | (subClus<<subClusShift) : kInvalid) ){ }
   explicit OmniClusterRef(Phase2Cluster1DRef const & ref, unsigned int subClus=0) : me(ref.refCore(), (ref.isNonnull() ? (ref.key() | kIsPhase2) | (subClus<<subClusShift) : kInvalid) ){ }
   
   ClusterPixelRef cluster_pixel()  const { 
@@ -47,6 +50,9 @@ public:
   }
   SiStripCluster const & stripCluster() const {
     return *ClusterStripRef(me.toRefCore(),index());
+  }
+  SiStripApproximateClusterv2 const & approxStripCluster() const {
+    return *ApproximateClusterStripRef(me.toRefCore(),index());
   }
   Phase2TrackerCluster1D const & phase2OTCluster() const {
     return *Phase2Cluster1DRef(me.toRefCore(),index());

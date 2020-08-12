@@ -3,6 +3,7 @@
 
 #include "DataFormats/GeometrySurface/interface/LocalError.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
+#include "DataFormats/SiStripApproximateClusterv2/interface/SiStripApproximateClusterv2.h"
 
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
 #include "DataFormats/TrajectoryState/interface/LocalTrajectoryParameters.h"
@@ -29,29 +30,51 @@ class StripClusterParameterEstimator
   using LocalValues = std::pair<LocalPoint,LocalError>;
   using ALocalValues = DynArray<LocalValues>;
   using AClusters =  DynArray<SiStripCluster const *>;
+  using AClusters_Approx =  DynArray<SiStripApproximateClusterv2 const *>;
   typedef std::vector<LocalValues> VLocalValues;
 
   virtual void localParameters(AClusters const & clusters, ALocalValues & retValues, const GeomDetUnit& gd, const LocalTrajectoryParameters & ltp) const {
+  }
+  virtual void approxlocalParameters(AClusters const & clusters_Approx, ALocalValues & retValues, const GeomDetUnit& gd, const LocalTrajectoryParameters & ltp) const {
   }
 
   
   virtual LocalValues localParameters( const SiStripCluster&,const GeomDetUnit&) const {
       return std::make_pair(LocalPoint(), LocalError());
   }
+  virtual LocalValues approxlocalParameters( const SiStripApproximateClusterv2&,const GeomDetUnit&) const {
+      return std::make_pair(LocalPoint(), LocalError());
+  }
   virtual LocalValues localParameters( const SiStripCluster& cluster, const GeomDetUnit& gd, const LocalTrajectoryParameters&) const {
     return localParameters(cluster,gd);
   }
+  virtual LocalValues approxlocalParameters( const SiStripApproximateClusterv2& cluster, const GeomDetUnit& gd, const LocalTrajectoryParameters&) const {
+    return approxlocalParameters(cluster,gd);
+  }
   virtual LocalValues localParameters( const SiStripCluster& cluster, const GeomDetUnit& gd, const TrajectoryStateOnSurface& tsos) const {
     return localParameters(cluster,gd,tsos.localParameters());
+  }
+  virtual LocalValues approxlocalParameters( const SiStripApproximateClusterv2& cluster, const GeomDetUnit& gd, const TrajectoryStateOnSurface& tsos) const {
+    return approxlocalParameters(cluster,gd,tsos.localParameters());
   }
   virtual VLocalValues localParametersV( const SiStripCluster& cluster, const GeomDetUnit& gd) const {
     VLocalValues vlp;
     vlp.push_back(localParameters(cluster,gd));
     return vlp;
   }
+  virtual VLocalValues approxlocalParametersV( const SiStripApproximateClusterv2& cluster, const GeomDetUnit& gd) const {
+    VLocalValues vlp;
+    vlp.push_back(approxlocalParameters(cluster,gd));
+    return vlp;
+  }
   virtual VLocalValues localParametersV( const SiStripCluster& cluster, const GeomDetUnit& gd, const TrajectoryStateOnSurface& tsos) const {
     VLocalValues vlp;
     vlp.push_back(localParameters(cluster,gd,tsos.localParameters()));
+    return vlp;
+  }
+  virtual VLocalValues approxlocalParametersV( const SiStripApproximateClusterv2& cluster, const GeomDetUnit& gd, const TrajectoryStateOnSurface& tsos) const {
+    VLocalValues vlp;
+    vlp.push_back(approxlocalParameters(cluster,gd,tsos.localParameters()));
     return vlp;
   }
 

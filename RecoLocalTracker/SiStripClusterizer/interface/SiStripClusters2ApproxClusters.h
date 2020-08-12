@@ -1,6 +1,10 @@
 #ifndef RecoLocalTracker_SiStripClusters2ApproxClusters_h
 #define RecoLocalTracker_SiStripClusters2ApproxClusters_h
 
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "TTree.h"
+
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/stream/EDProducer.h"
@@ -23,9 +27,27 @@ public:
 
 private:
 
+  edm::Service<TFileService> fs;
+
   edm::InputTag inputClusters;
   edm::EDGetTokenT< edmNew::DetSetVector<SiStripCluster> > clusterToken;  
+
+  TTree* stripTree_;
+
+  uint32_t event;
+  std::vector< uint32_t > detectorID;
+  std::vector< std::vector< uint16_t >> firstStrip;
+  std::vector< std::vector< uint8_t > > widths;
+
+  void clearVectors();
 };
+
+void SiStripClusters2ApproxClusters::clearVectors(){
+  event = 0;
+  detectorID.clear();
+  firstStrip.clear();
+  widths.clear();
+}
 
 DEFINE_FWK_MODULE(SiStripClusters2ApproxClusters);
 #endif
