@@ -48,9 +48,12 @@
 #include "DataFormats/ParticleFlowReco/interface/PFCluster.h"
 #include "DataFormats/ParticleFlowReco/interface/PFClusterFwd.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/JetReco/interface/GenJet.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 
-
+//Gen info
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 
 // Vertex significance
 #include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
@@ -71,6 +74,7 @@ class TrackAnalyzer : public edm::EDAnalyzer {
 
     void fillVertices(const edm::Event& iEvent);
     void fillJets2(const edm::Event& iEvent);
+    void fillGen(const edm::Event& iEvent);
     void fillTracks(const edm::Event& iEvent, const edm::EventSetup& iSetup);
     void clearVectors();
 
@@ -99,6 +103,9 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      //edm::EDGetTokenT<pat::JetCollection> jets3Token_;
      //edm::InputTag jets4_;
      //edm::EDGetTokenT<pat::JetCollection> jets4Token_;
+
+     edm::EDGetTokenT<edm::View<pat::PackedGenParticle> > packedGenToken_;
+     edm::EDGetTokenT< std::vector<reco::GenJet> > packedGenJetToken_;
 
 
      edm::EDGetTokenT<pat::PackedCandidateCollection> pfToken_;
@@ -167,6 +174,10 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      std::vector< int   > chargedMultiplicity;
      int jetN;
 
+     std::vector< float > genJetEta;
+     std::vector< float > genJetPt;
+     std::vector< float > genJetPhi;
+     std::vector< int > genJetChargedMultiplicity;
 
      std::vector<std::vector<int>>		dau_chg;
      std::vector<std::vector<int>>	        dau_pid;
@@ -185,6 +196,12 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      std::vector<std::vector<float>>		dau_vp_difY;
      std::vector<std::vector<float>>		dau_vp_difX;
 
+     
+     std::vector<std::vector<int>>		gendau_chg;
+     std::vector<std::vector<int>>	        gendau_pid;
+     std::vector<std::vector<float>>		gendau_pt;
+     std::vector<std::vector<float>>		gendau_eta;
+     std::vector<std::vector<float>>		gendau_phi;
 };
 
 void TrackAnalyzer::clearVectors(){
@@ -254,6 +271,16 @@ dau_vp_difX.clear();
 dau_pt_sum.clear();
 //jetN.clear();
 
+  genJetEta.clear();
+  genJetPhi.clear();
+  genJetPt.clear();
+  genJetChargedMultiplicity.clear();
+
+  gendau_chg.clear();
+  gendau_pid.clear();
+  gendau_pt.clear();
+  gendau_eta.clear();
+  gendau_phi.clear();
 }
 
 #endif 

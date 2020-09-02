@@ -20,6 +20,9 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
   
   beamSpotProducer_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc",edm::InputTag("offlineBeamSpot")));
 
+  packedGenToken_ = consumes<edm::View<pat::PackedGenParticle> >(iConfig.getParameter<edm::InputTag>("packedGen"));
+  packedGenJetToken_ = consumes< std::vector< reco::GenJet > >(iConfig.getParameter<edm::InputTag>("genJets"));
+
   //jets1Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets1"));
   jets2Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets2"));
   //jets3Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets3"));
@@ -43,6 +46,8 @@ void TrackAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   fillJets2(iEvent);
   //fillJets3(iEvent);
   //fillJets4(iEvent);
+
+  fillGen(iEvent);
 
   if(doTrack_) fillTracks(iEvent, iSetup); 
   trackTree_->Fill();
@@ -189,6 +194,67 @@ void TrackAnalyzer::fillJets2(const edm::Event& iEvent) {
 
 }
 
+void TrackAnalyzer::fillGen(const edm::Event& iEvent){
+
+  edm::Handle<edm::View<pat::PackedGenParticle> > packed;
+  iEvent.getByToken(packedGenToken_,packed);
+
+  edm::Handle< std::vector< reco::GenJet > > genJets;
+  iEvent.getByToken(packedGenJetToken_,genJets);
+  
+  //all particles
+  /*
+  for(size_t i=0; i<(*packed).size();i++){
+    const reco::Candidate * p = &(*packed)[i];
+    if( p->charge() == 0 ) continue;
+    if( fabs( p->eta() ) > 2.4 ) continue;
+    if( p->pt() < 0.1 ) continue;
+    std::cout << "PdgID: " << p->pdgId() << " pt " << p->pt() << " eta: " << p->eta() << " phi: " << p->phi() << std::endl;    
+  }
+  */
+
+  //jets and their  constituents
+  for(size_t i=0; i<(*genJets).size();i++){
+    const reco::GenJet * jt = &(*genJets)[i];
+    if( jt->pt()<100 ) continue;
+    if( fabs(jt->eta()) > 2.5 ) continue;
+
+    genJetPt.push_back(jt->pt());
+    genJetEta.push_back(jt->eta());
+    genJetPhi.push_back(jt->phi());
+  
+    //std::cout << "Jet pt " << jt->pt() << " eta: " << jt->eta() << " phi: " << jt->phi() << std::endl;   
+    int chargedMult = 0;
+    std::vector< float > tempPt;
+    std::vector< float > tempEta;
+    std::vector< float > tempPhi;
+    std::vector< int > tempPiD;
+    std::vector< int > tempChg;
+    for( size_t j = 0; j < jt->numberOfDaughters(); j++){
+      const reco::Candidate * p = jt->daughter(j);
+
+      tempChg.push_back(p->charge());
+      tempPiD.push_back(p->pdgId());
+      tempPt.push_back(p->pt());
+      tempEta.push_back(p->eta());
+      tempPhi.push_back(p->phi());
+
+      if( p->charge() == 0 ) continue;
+    
+      chargedMult++;
+
+      //std::cout << "PdgID: " << p->pdgId() << " pt " << p->pt() << " eta: " << p->eta() << " phi: " << p->phi() << std::endl;    
+    } 
+    genJetChargedMultiplicity.push_back( chargedMult );
+    gendau_pt.push_back(tempPt);
+    gendau_eta.push_back(tempEta);   
+    gendau_phi.push_back(tempPhi);   
+    gendau_pid.push_back(tempPiD);   
+    gendau_chg.push_back(tempChg);   
+ 
+  }
+}
+
 //--------------------------------------------------------------------------------------------------
 void TrackAnalyzer::fillTracks(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
   
@@ -306,7 +372,17 @@ void TrackAnalyzer::beginJob()
   trackTree_->Branch("dau_vp_difY",	&dau_vp_difY);
   trackTree_->Branch("dau_vp_difX",	&dau_vp_difX);
 
+  
+  trackTree_->Branch("genJetEta",&genJetEta);
+  trackTree_->Branch("genJetPt",&genJetPt);
+  trackTree_->Branch("genJetPhi",&genJetPhi);
+  trackTree_->Branch("genJetChargedMultiplicity",&genJetChargedMultiplicity);
 
+  trackTree_->Branch("genDau_chg",		&gendau_chg); 
+  trackTree_->Branch("genDau_pid",		&gendau_pid);	 
+  trackTree_->Branch("genDau_pt",		&gendau_pt);
+  trackTree_->Branch("genDau_eta",		&gendau_eta);	 
+  trackTree_->Branch("genDau_phi",		&gendau_phi );
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
