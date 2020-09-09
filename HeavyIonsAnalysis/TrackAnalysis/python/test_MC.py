@@ -24,7 +24,7 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 
 # root output
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("output.root"))
+    fileName = cms.string("output_MC.root"))
 
 process.hlt = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hlt.HLTPaths = ['HLT_PFJet500*'] # for allphysics
@@ -41,6 +41,7 @@ process.analyzer = cms.EDAnalyzer('TrackAnalyzer',
     lostTracksSrc = cms.InputTag("lostTracks"),
     beamSpotSrc = cms.untracked.InputTag('offlineBeamSpot'),
     jets2 = cms.InputTag("slimmedJetsPuppi"),
+    doGen = cms.untracked.bool(True),
     packedGen = cms.InputTag("packedGenParticles"),
     genJets = cms.InputTag("slimmedGenJets")
 )

@@ -121,6 +121,8 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      TTree* trackTree_;
      //TTree* jetTree_;
 
+     bool doGen;
+
      //Branch entries
      int nRun;
      int nEv;

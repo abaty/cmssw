@@ -6,6 +6,7 @@
 TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
 {
   doTrack_ = iConfig.getUntrackedParameter<bool>("doTrack",true);
+  doGen = iConfig.getUntrackedParameter< bool >("doGen",false);
 
   trackPtMin_ = iConfig.getUntrackedParameter<double>("trackPtMin",0.01);
 
@@ -20,13 +21,16 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
   
   beamSpotProducer_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc",edm::InputTag("offlineBeamSpot")));
 
-  packedGenToken_ = consumes<edm::View<pat::PackedGenParticle> >(iConfig.getParameter<edm::InputTag>("packedGen"));
-  packedGenJetToken_ = consumes< std::vector< reco::GenJet > >(iConfig.getParameter<edm::InputTag>("genJets"));
+  if(doGen){
+    packedGenToken_ = consumes<edm::View<pat::PackedGenParticle> >(iConfig.getParameter<edm::InputTag>("packedGen"));
+    packedGenJetToken_ = consumes< std::vector< reco::GenJet > >(iConfig.getParameter<edm::InputTag>("genJets"));
+  }
 
   //jets1Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets1"));
   jets2Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets2"));
   //jets3Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets3"));
   //jets4Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets4"));
+
 }
 //--------------------------------------------------------------------------------------------------
 TrackAnalyzer::~TrackAnalyzer()
@@ -47,7 +51,7 @@ void TrackAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   //fillJets3(iEvent);
   //fillJets4(iEvent);
 
-  fillGen(iEvent);
+  if(doGen) fillGen(iEvent);
 
   if(doTrack_) fillTracks(iEvent, iSetup); 
   trackTree_->Fill();
@@ -372,17 +376,18 @@ void TrackAnalyzer::beginJob()
   trackTree_->Branch("dau_vp_difY",	&dau_vp_difY);
   trackTree_->Branch("dau_vp_difX",	&dau_vp_difX);
 
-  
-  trackTree_->Branch("genJetEta",&genJetEta);
-  trackTree_->Branch("genJetPt",&genJetPt);
-  trackTree_->Branch("genJetPhi",&genJetPhi);
-  trackTree_->Branch("genJetChargedMultiplicity",&genJetChargedMultiplicity);
+  if(doGen){ 
+    trackTree_->Branch("genJetEta",&genJetEta);
+    trackTree_->Branch("genJetPt",&genJetPt);
+    trackTree_->Branch("genJetPhi",&genJetPhi);
+    trackTree_->Branch("genJetChargedMultiplicity",&genJetChargedMultiplicity);
 
-  trackTree_->Branch("genDau_chg",		&gendau_chg); 
-  trackTree_->Branch("genDau_pid",		&gendau_pid);	 
-  trackTree_->Branch("genDau_pt",		&gendau_pt);
-  trackTree_->Branch("genDau_eta",		&gendau_eta);	 
-  trackTree_->Branch("genDau_phi",		&gendau_phi );
+    trackTree_->Branch("genDau_chg",		&gendau_chg); 
+    trackTree_->Branch("genDau_pid",		&gendau_pid);	 
+    trackTree_->Branch("genDau_pt",		&gendau_pt);
+    trackTree_->Branch("genDau_eta",		&gendau_eta);	 
+    trackTree_->Branch("genDau_phi",		&gendau_phi );
+  }
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
