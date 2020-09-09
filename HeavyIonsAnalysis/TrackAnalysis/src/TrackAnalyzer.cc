@@ -22,6 +22,7 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
   beamSpotProducer_ = consumes<reco::BeamSpot>(iConfig.getUntrackedParameter<edm::InputTag>("beamSpotSrc",edm::InputTag("offlineBeamSpot")));
 
   if(doGen){
+    genEvtInfo_ = consumes< GenEventInfoProduct >(iConfig.getParameter<edm::InputTag>("genEvtInfo"));
     packedGenToken_ = consumes<edm::View<pat::PackedGenParticle> >(iConfig.getParameter<edm::InputTag>("packedGen"));
     packedGenJetToken_ = consumes< std::vector< reco::GenJet > >(iConfig.getParameter<edm::InputTag>("genJets"));
   }
@@ -200,6 +201,12 @@ void TrackAnalyzer::fillJets2(const edm::Event& iEvent) {
 
 void TrackAnalyzer::fillGen(const edm::Event& iEvent){
 
+  edm::Handle< GenEventInfoProduct > genEvt;
+  iEvent.getByToken(genEvtInfo_,genEvt);
+  genWeight = genEvt->weight();
+  genQScale = genEvt->qScale();
+  genSignalProcessID = genEvt->signalProcessID();
+
   edm::Handle<edm::View<pat::PackedGenParticle> > packed;
   iEvent.getByToken(packedGenToken_,packed);
 
@@ -377,6 +384,10 @@ void TrackAnalyzer::beginJob()
   trackTree_->Branch("dau_vp_difX",	&dau_vp_difX);
 
   if(doGen){ 
+    trackTree_->Branch("genQScale",&genQScale);
+    trackTree_->Branch("genWeight",&genWeight);
+    trackTree_->Branch("genSignalProcessID",&genSignalProcessID);
+
     trackTree_->Branch("genJetEta",&genJetEta);
     trackTree_->Branch("genJetPt",&genJetPt);
     trackTree_->Branch("genJetPhi",&genJetPhi);

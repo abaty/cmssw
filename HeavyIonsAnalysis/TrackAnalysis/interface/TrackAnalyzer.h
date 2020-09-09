@@ -41,6 +41,7 @@
 #include "SimTracker/Records/interface/TrackAssociatorRecord.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/Common/interface/ValueMap.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 // Particle Flow
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
@@ -107,6 +108,7 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      edm::EDGetTokenT<edm::View<pat::PackedGenParticle> > packedGenToken_;
      edm::EDGetTokenT< std::vector<reco::GenJet> > packedGenJetToken_;
 
+     edm::EDGetTokenT< GenEventInfoProduct > genEvtInfo_;
 
      edm::EDGetTokenT<pat::PackedCandidateCollection> pfToken_;
 
@@ -175,6 +177,10 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      std::vector< int   > muonMultiplicity;
      std::vector< int   > chargedMultiplicity;
      int jetN;
+
+     float genQScale;
+     float genWeight;
+     int   genSignalProcessID;
 
      std::vector< float > genJetEta;
      std::vector< float > genJetPt;
@@ -272,6 +278,9 @@ dau_vp_difX.clear();
 
 dau_pt_sum.clear();
 //jetN.clear();
+  genQScale = -1;
+  genWeight = -1;
+  genSignalProcessID = -1;
 
   genJetEta.clear();
   genJetPhi.clear();

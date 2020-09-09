@@ -42,6 +42,7 @@ process.analyzer = cms.EDAnalyzer('TrackAnalyzer',
     beamSpotSrc = cms.untracked.InputTag('offlineBeamSpot'),
     jets2 = cms.InputTag("slimmedJetsPuppi"),
     doGen = cms.untracked.bool(True),
+    genEvtInfo = cms.InputTag("generator"),
     packedGen = cms.InputTag("packedGenParticles"),
     genJets = cms.InputTag("slimmedGenJets")
 )
