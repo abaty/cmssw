@@ -42,6 +42,8 @@
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/Common/interface/ValueMap.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "DataFormats/Common/interface/TriggerResults.h" 
+#include "FWCore/Common/interface/TriggerNames.h"
 
 // Particle Flow
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
@@ -55,6 +57,7 @@
 //Gen info
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 // Vertex significance
 #include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
@@ -95,6 +98,8 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      //edm::EDGetTokenT<pat::PackedCandidateCollection> lostTracksSrc_;
 
      edm::EDGetTokenT<reco::BeamSpot> beamSpotProducer_;
+
+     edm::EDGetTokenT< std::vector< PileupSummaryInfo > > puSummary_;
 
      //edm::InputTag jets1_;
      //edm::EDGetTokenT<pat::JetCollection> jets1Token_;
@@ -210,6 +215,23 @@ class TrackAnalyzer : public edm::EDAnalyzer {
      std::vector<std::vector<float>>		gendau_pt;
      std::vector<std::vector<float>>		gendau_eta;
      std::vector<std::vector<float>>		gendau_phi;
+
+
+    int pu;
+    int puTrue;
+    std::vector< float > puZ;
+    std::vector< float > puPthat;
+    std::vector< float > puSumPt0p1;
+    std::vector< float > puSumPt0p5;
+    std::vector< int > puNTrk0p1;
+    std::vector< int > puNTrk0p5;
+
+    float minJetPt;
+    float maxJetEta;
+
+    edm::EDGetTokenT<edm::TriggerResults> tok_triggerResults_;
+    bool didHLTFire;
+
 };
 
 void TrackAnalyzer::clearVectors(){
@@ -292,6 +314,18 @@ dau_pt_sum.clear();
   gendau_pt.clear();
   gendau_eta.clear();
   gendau_phi.clear();
+
+
+  pu = -1;
+  puTrue = -1;
+  puZ.clear();
+  puPthat.clear();
+  puSumPt0p1.clear();
+  puSumPt0p5.clear();
+  puNTrk0p1.clear();
+  puNTrk0p5.clear();
+
+  didHLTFire = false;
 }
 
 #endif 

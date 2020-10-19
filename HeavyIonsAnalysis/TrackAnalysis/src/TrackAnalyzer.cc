@@ -5,6 +5,9 @@
 
 TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
 {
+  minJetPt = iConfig.getUntrackedParameter<double>("minJetPt",100);
+  maxJetEta = iConfig.getUntrackedParameter<double>("maxJetEta",2.5);
+
   doTrack_ = iConfig.getUntrackedParameter<bool>("doTrack",true);
   doGen = iConfig.getUntrackedParameter< bool >("doGen",false);
 
@@ -25,12 +28,16 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
     genEvtInfo_ = consumes< GenEventInfoProduct >(iConfig.getParameter<edm::InputTag>("genEvtInfo"));
     packedGenToken_ = consumes<edm::View<pat::PackedGenParticle> >(iConfig.getParameter<edm::InputTag>("packedGen"));
     packedGenJetToken_ = consumes< std::vector< reco::GenJet > >(iConfig.getParameter<edm::InputTag>("genJets"));
+    puSummary_ = consumes< std::vector< PileupSummaryInfo> >(iConfig.getParameter<edm::InputTag>("puSummaryInfo")); 
   }
 
   //jets1Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets1"));
   jets2Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets2"));
   //jets3Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets3"));
   //jets4Token_      = consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets4"));
+
+  //hlt stuff
+  tok_triggerResults_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults::HLT"));
 
 }
 //--------------------------------------------------------------------------------------------------
@@ -45,6 +52,20 @@ void TrackAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   nLumi = (int)iEvent.luminosityBlock();
 
   clearVectors();
+ 
+  //hlt decision
+  edm::Handle<edm::TriggerResults> triggerResults;
+  iEvent.getByToken(tok_triggerResults_, triggerResults);
+  const auto& filterNames = iEvent.triggerNames(*triggerResults);
+  
+  //quickly loop through first 999 versions checking for any passes
+  for(int i = 1; i<999; i++){  
+    const auto& index = filterNames.triggerIndex("HLT_PFJet500_v"+std::to_string(i));
+    bool tempDidHLTFire =  (index < filterNames.size() && triggerResults->wasrun(index) && triggerResults->accept(index));
+    didHLTFire = didHLTFire || tempDidHLTFire;
+    if(tempDidHLTFire) break;
+  }
+
   fillVertices(iEvent);
 
   //fillJets1(iEvent);
@@ -64,6 +85,7 @@ void TrackAnalyzer::fillVertices(const edm::Event& iEvent) {
   edm::Handle<reco::VertexCollection> vertexCollection;
   iEvent.getByToken(vertexSrc_,vertexCollection);
   recoVertices = vertexCollection.product();
+
   unsigned int nVertex = recoVertices->size();
   for (unsigned int i = 0; i < nVertex; ++i) {
     xVtx.push_back( recoVertices->at(i).position().x() );
@@ -212,7 +234,10 @@ void TrackAnalyzer::fillGen(const edm::Event& iEvent){
 
   edm::Handle< std::vector< reco::GenJet > > genJets;
   iEvent.getByToken(packedGenJetToken_,genJets);
-  
+ 
+  edm::Handle< std::vector< PileupSummaryInfo > > puSummary;
+  iEvent.getByToken(puSummary_, puSummary);
+ 
   //all particles
   /*
   for(size_t i=0; i<(*packed).size();i++){
@@ -227,8 +252,8 @@ void TrackAnalyzer::fillGen(const edm::Event& iEvent){
   //jets and their  constituents
   for(size_t i=0; i<(*genJets).size();i++){
     const reco::GenJet * jt = &(*genJets)[i];
-    if( jt->pt()<100 ) continue;
-    if( fabs(jt->eta()) > 2.5 ) continue;
+    if( jt->pt()<minJetPt ) continue;
+    if( fabs(jt->eta()) > maxJetEta ) continue;
 
     genJetPt.push_back(jt->pt());
     genJetEta.push_back(jt->eta());
@@ -246,6 +271,9 @@ void TrackAnalyzer::fillGen(const edm::Event& iEvent){
 
       tempChg.push_back(p->charge());
       tempPiD.push_back(p->pdgId());
+      
+      //check photons for mom to see if direct
+      //if(p->pdgId() == 22) std::cout << (p->mother())->pdgId() << std::endl;
       tempPt.push_back(p->pt());
       tempEta.push_back(p->eta());
       tempPhi.push_back(p->phi());
@@ -263,6 +291,21 @@ void TrackAnalyzer::fillGen(const edm::Event& iEvent){
     gendau_pid.push_back(tempPiD);   
     gendau_chg.push_back(tempChg);   
  
+  }
+
+  //pileup info
+  for(unsigned int i = 0; i<(*puSummary).size(); i++){
+    int bc = (*puSummary).at(i).getBunchCrossing(); 
+    if(bc==0){//ignore out of time pu (shouldn't be in mini AOD though)
+      pu = (*puSummary).at(i).getPU_NumInteractions();
+      puTrue = (*puSummary).at(i).getTrueNumInteractions();
+      puZ = (*puSummary).at(i).getPU_zpositions();
+      puPthat = (*puSummary).at(i).getPU_pT_hats();
+      puSumPt0p5 = (*puSummary).at(i).getPU_sumpT_highpT();
+      puSumPt0p1 = (*puSummary).at(i).getPU_sumpT_lowpT();
+      puNTrk0p5 = (*puSummary).at(i).getPU_ntrks_highpT();
+      puNTrk0p1 = (*puSummary).at(i).getPU_ntrks_lowpT();
+    }
   }
 }
 
@@ -383,6 +426,8 @@ void TrackAnalyzer::beginJob()
   trackTree_->Branch("dau_vp_difY",	&dau_vp_difY);
   trackTree_->Branch("dau_vp_difX",	&dau_vp_difX);
 
+  trackTree_->Branch("didHLTFire",&didHLTFire);
+
   if(doGen){ 
     trackTree_->Branch("genQScale",&genQScale);
     trackTree_->Branch("genWeight",&genWeight);
@@ -398,6 +443,15 @@ void TrackAnalyzer::beginJob()
     trackTree_->Branch("genDau_pt",		&gendau_pt);
     trackTree_->Branch("genDau_eta",		&gendau_eta);	 
     trackTree_->Branch("genDau_phi",		&gendau_phi );
+
+    trackTree_->Branch("nPu",&pu);  
+    trackTree_->Branch("nTruePu",&puTrue);
+    trackTree_->Branch("puZ",&puZ);
+    trackTree_->Branch("puPthat",&puPthat);  
+    trackTree_->Branch("puSumPt0p1",&puSumPt0p1);  
+    trackTree_->Branch("puSumPt0p5",&puSumPt0p5);  
+    trackTree_->Branch("puNTrk0p1",&puNTrk0p1);  
+    trackTree_->Branch("puNTrk0p5",&puNTrk0p5);  
   }
 }
 

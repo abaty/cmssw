@@ -34,6 +34,8 @@ process.eventFilterHLT = cms.Sequence(process.hlt)
 
 
 process.analyzer = cms.EDAnalyzer('TrackAnalyzer',
+    minJetPt = cms.untracked.double(100),
+    maxJetEta = cms.untracked.double(2.5),
     doTrack = cms.untracked.bool(True),
     trackPtMin = cms.untracked.double(0.01),
     vertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),

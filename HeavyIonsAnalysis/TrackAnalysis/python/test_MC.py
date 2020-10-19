@@ -12,7 +12,7 @@ process.source = cms.Source("PoolSource",
 
 # number of events to process, set to -1 to process all events
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(10)
     )
 
 # load Global Tag, geometry, etc.
@@ -34,6 +34,8 @@ process.eventFilterHLT = cms.Sequence(process.hlt)
 
 
 process.analyzer = cms.EDAnalyzer('TrackAnalyzer',
+    minJetPt = cms.untracked.double(100),
+    maxJetEta = cms.untracked.double(2.5),
     doTrack = cms.untracked.bool(True),
     trackPtMin = cms.untracked.double(0.01),
     vertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
@@ -44,12 +46,13 @@ process.analyzer = cms.EDAnalyzer('TrackAnalyzer',
     doGen = cms.untracked.bool(True),
     genEvtInfo = cms.InputTag("generator"),
     packedGen = cms.InputTag("packedGenParticles"),
-    genJets = cms.InputTag("slimmedGenJets")
+    genJets = cms.InputTag("slimmedGenJets"),
+    puSummaryInfo = cms.InputTag("slimmedAddPileupInfo")
 )
 
 # main forest sequence
 process.runAnalyzer = cms.Path(
-    process.eventFilterHLT*
+#    process.eventFilterHLT*
     process.analyzer
     )
 
