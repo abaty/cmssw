@@ -16,8 +16,8 @@ pixeltrackerlocalrecoTask = cms.Task(
     siPixelRecHitsPreSplittingTask)
 
 striptrackerlocalrecoTask = cms.Task(
-    siStripZeroSuppression,
-    siStripClusters,
+#    siStripZeroSuppression,
+#    siStripClusters,
     siStripMatchedRecHits)
 
 trackerlocalrecoTask = cms.Task(
