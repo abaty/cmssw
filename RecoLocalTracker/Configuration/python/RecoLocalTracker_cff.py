@@ -22,7 +22,7 @@ striptrackerlocalrecoTask = cms.Task(
 
 trackerlocalrecoTask = cms.Task(
     pixeltrackerlocalrecoTask,
-    striptrackerlocalrecoTask,
+#    striptrackerlocalrecoTask,
     clusterSummaryProducer)
 
 pixeltrackerlocalreco = cms.Sequence(pixeltrackerlocalrecoTask)

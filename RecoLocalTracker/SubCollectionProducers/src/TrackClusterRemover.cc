@@ -7,6 +7,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/TrackerRecHit2D/interface/SiStripMatchedRecHit2D.h"
 
@@ -25,6 +26,7 @@
 #include "RecoTracker/TransientTrackingRecHit/interface/Traj2TrackHits.h"
 
 #include <limits>
+#include <iostream>
 
 namespace {
 
@@ -39,6 +41,7 @@ namespace {
 
     using PixelMaskContainer = edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster>>;
     using StripMaskContainer = edm::ContainerMask<edmNew::DetSetVector<SiStripCluster>>;
+    using ApproxStripMaskContainer = edm::ContainerMask<edmNew::DetSetVector<SiStripApproximateCluster>>;
 
     using QualityMaskCollection = std::vector<unsigned char>;
 
@@ -51,9 +54,11 @@ namespace {
 
     edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>> pixelClusters_;
     edm::EDGetTokenT<edmNew::DetSetVector<SiStripCluster>> stripClusters_;
+    edm::EDGetTokenT<edmNew::DetSetVector<SiStripApproximateCluster>> approxStripClusters_;
 
     edm::EDGetTokenT<PixelMaskContainer> oldPxlMaskToken_;
     edm::EDGetTokenT<StripMaskContainer> oldStrMaskToken_;
+    edm::EDGetTokenT<ApproxStripMaskContainer> oldApproxStrMaskToken_;
 
     // backward compatibility during transition period
     edm::EDGetTokenT<edm::ValueMap<int>> overrideTrkQuals_;
@@ -65,6 +70,7 @@ namespace {
     desc.add<edm::InputTag>("trackClassifier", edm::InputTag("", "QualityMasks"));
     desc.add<edm::InputTag>("pixelClusters", edm::InputTag("siPixelClusters"));
     desc.add<edm::InputTag>("stripClusters", edm::InputTag("siStripClusters"));
+    desc.add<edm::InputTag>("approximateStripClusters", edm::InputTag());
     desc.add<edm::InputTag>("oldClusterRemovalInfo", edm::InputTag());
 
     desc.add<std::string>("TrackQuality", "highPurity");
@@ -87,10 +93,14 @@ namespace {
   {
     auto const& pixelClusters = iConfig.getParameter<edm::InputTag>("pixelClusters");
     auto const& stripClusters = iConfig.getParameter<edm::InputTag>("stripClusters");
+    auto const& approxStripClusters = iConfig.getParameter<edm::InputTag>("approximateStripClusters");
 
-    if (pixelClusters.label().empty() && stripClusters.label().empty())
+    if (pixelClusters.label().empty() && stripClusters.label().empty() && approxStripClusters.label().empty())
       throw edm::Exception(edm::errors::Configuration)
           << "Configuration Error: TrackClusterRemover used without input cluster collections";
+    if (!stripClusters.label().empty() && !approxStripClusters.label().empty())
+      throw edm::Exception(edm::errors::Configuration)
+          << "Configuration Error: TrackClusterRemover given two collections of strip clusters (siStripClusters + siStripApproximateClusters).  Please only give one.";
     if (!pixelClusters.label().empty()) {
       pixelClusters_ = consumes<edmNew::DetSetVector<SiPixelCluster>>(pixelClusters);
       produces<edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster>>>();
@@ -99,6 +109,11 @@ namespace {
       stripClusters_ = consumes<edmNew::DetSetVector<SiStripCluster>>(stripClusters);
       produces<edm::ContainerMask<edmNew::DetSetVector<SiStripCluster>>>();
     }
+    if (!approxStripClusters.label().empty()) {
+      approxStripClusters_ = consumes<edmNew::DetSetVector<SiStripApproximateCluster>>(approxStripClusters);
+      produces<edm::ContainerMask<edmNew::DetSetVector<SiStripApproximateCluster>>>();
+    }
+
     // old mode
     auto const& overrideTrkQuals = iConfig.getParameter<edm::InputTag>("overrideTrkQuals");
     if (!overrideTrkQuals.label().empty())
@@ -111,7 +126,13 @@ namespace {
     auto const& oldClusterRemovalInfo = iConfig.getParameter<edm::InputTag>("oldClusterRemovalInfo");
     if (!oldClusterRemovalInfo.label().empty()) {
       oldPxlMaskToken_ = consumes<PixelMaskContainer>(oldClusterRemovalInfo);
-      oldStrMaskToken_ = consumes<StripMaskContainer>(oldClusterRemovalInfo);
+      if(!stripClusters.label().empty()) {
+        std::cout << "test reg:" << stripClusters.label() << " ap:" << approxStripClusters.label() << " " << iConfig.getParameter<std::string>("TrackQuality")  << std::endl;
+        oldStrMaskToken_ = consumes<StripMaskContainer>(oldClusterRemovalInfo);
+      } else {
+        std::cout << "test2 reg:" << stripClusters.label() << " ap:" << approxStripClusters.label() <<  " " << iConfig.getParameter<std::string>("TrackQuality") << std::endl;
+        oldApproxStrMaskToken_ = consumes<ApproxStripMaskContainer>(oldClusterRemovalInfo);
+      }
     }
   }
 
@@ -122,6 +143,9 @@ namespace {
     edm::Handle<edmNew::DetSetVector<SiStripCluster>> stripClusters;
     if (!stripClusters_.isUninitialized())
       iEvent.getByToken(stripClusters_, stripClusters);
+    edm::Handle<edmNew::DetSetVector<SiStripApproximateCluster>> approxStripClusters;
+    if (!approxStripClusters_.isUninitialized())
+      iEvent.getByToken(approxStripClusters_, approxStripClusters);
 
     std::vector<bool> collectedStrips;
     std::vector<bool> collectedPixels;
@@ -129,13 +153,23 @@ namespace {
     if (!oldPxlMaskToken_.isUninitialized()) {
       edm::Handle<PixelMaskContainer> oldPxlMask;
       edm::Handle<StripMaskContainer> oldStrMask;
+      edm::Handle<ApproxStripMaskContainer> oldApproxStrMask;
       iEvent.getByToken(oldPxlMaskToken_, oldPxlMask);
-      iEvent.getByToken(oldStrMaskToken_, oldStrMask);
+      if(!oldStrMaskToken_.isUninitialized()){
+        iEvent.getByToken(oldStrMaskToken_, oldStrMask);
+      }
+      if(!oldApproxStrMaskToken_.isUninitialized()){
+        iEvent.getByToken(oldApproxStrMaskToken_, oldApproxStrMask);
+      }
       LogDebug("TrackClusterRemover") << "to merge in, " << oldStrMask->size() << " strp, " << oldPxlMask->size()
                                       << " pxl";
 
       // std::cout <<"TrackClusterRemover "<<"to merge in, "<<oldStrMask->size()<<" strp and "<<oldPxlMask->size()<<" pxl" << std::endl;
-      oldStrMask->copyMaskTo(collectedStrips);
+      if(!stripClusters_.isUninitialized()){
+        oldStrMask->copyMaskTo(collectedStrips);
+      } else {
+        oldApproxStrMask->copyMaskTo(collectedStrips);
+      }
       oldPxlMask->copyMaskTo(collectedPixels);
       if (!stripClusters_.isUninitialized()) {
         assert(stripClusters->dataSize() >= collectedStrips.size());
@@ -143,9 +177,15 @@ namespace {
         //std::cout << "TrackClusterRemover " <<"total strip already to skip: "
         //	<<std::count(collectedStrips.begin(),collectedStrips.end(),true) <<std::endl;
       }
+      if (!approxStripClusters_.isUninitialized()) {
+        assert(approxStripClusters->dataSize() >= collectedStrips.size());
+        collectedStrips.resize(approxStripClusters->dataSize(), false);
+      }
     } else {
       if (!stripClusters_.isUninitialized())
         collectedStrips.resize(stripClusters->dataSize(), false);
+      if (!approxStripClusters_.isUninitialized())
+        collectedStrips.resize(approxStripClusters->dataSize(), false);
       if (!pixelClusters_.isUninitialized())
         collectedPixels.resize(pixelClusters->dataSize(), false);
     }
@@ -204,6 +244,8 @@ namespace {
         auto const& cluster = thit.firstClusterRef();
         if (!stripClusters_.isUninitialized() && cluster.isStrip())
           collectedStrips[cluster.key()] = true;
+        if (!approxStripClusters_.isUninitialized() && cluster.isStrip())
+          collectedStrips[cluster.key()] = true;
         if (!pixelClusters_.isUninitialized() && cluster.isPixel())
           collectedPixels[cluster.key()] = true;
         if (trackerHitRTTI::isMatched(thit))
@@ -215,6 +257,14 @@ namespace {
     if (!stripClusters_.isUninitialized()) {
       auto removedStripClusterMask = std::make_unique<StripMaskContainer>(
           edm::RefProd<edmNew::DetSetVector<SiStripCluster>>(stripClusters), collectedStrips);
+      LogDebug("TrackClusterRemover") << "total strip to skip: "
+                                      << std::count(collectedStrips.begin(), collectedStrips.end(), true);
+      // std::cout << "TrackClusterRemover " <<"total strip to skip: "<<std::count(collectedStrips.begin(),collectedStrips.end(),true) <<std::endl;
+      iEvent.put(std::move(removedStripClusterMask));
+    }
+    if (!approxStripClusters_.isUninitialized()) {
+      auto removedStripClusterMask = std::make_unique<ApproxStripMaskContainer>(
+          edm::RefProd<edmNew::DetSetVector<SiStripApproximateCluster>>(approxStripClusters), collectedStrips);
       LogDebug("TrackClusterRemover") << "total strip to skip: "
                                       << std::count(collectedStrips.begin(), collectedStrips.end(), true);
       // std::cout << "TrackClusterRemover " <<"total strip to skip: "<<std::count(collectedStrips.begin(),collectedStrips.end(),true) <<std::endl;

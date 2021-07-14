@@ -10,6 +10,14 @@ from RecoTracker.IterativeTracking.dnnQualityCuts import qualityCutDictionary
 lowPtQuadStepClusters = _cfg.clusterRemoverForIter('LowPtQuadStep')
 for _eraName, _postfix, _era in _cfg.nonDefaultEras():
     _era.toReplaceWith(lowPtQuadStepClusters, _cfg.clusterRemoverForIter('LowPtQuadStep', _eraName, _postfix))
+#from RecoLocalTracker.SubCollectionProducers.trackClusterRemover_cfi import trackClusterRemover as _trackClusterRemover
+#lowPtQuadStepClusters = _trackClusterRemover.clone(
+#    maxChi2                                  = 9.0,
+#    pixelClusters                            = "siPixelClusters",
+#    TrackQuality = 'tightLowPtQuad',
+#    stripClusters = "",
+#    approximateStripClusters = "SiStripClusters2ApproxClusters" 
+#)
 
 
 # SEEDING LAYERS
@@ -168,6 +176,7 @@ lowPtQuadStepTrackCandidates = RecoTracker.CkfPattern.CkfTrackCandidates_cfi.ckf
     TrajectoryBuilderPSet       = dict(refToPSet_ = 'lowPtQuadStepTrajectoryBuilder'),
     TrajectoryCleaner           = 'lowPtQuadStepTrajectoryCleanerBySharedHits',
     clustersToSkip              = cms.InputTag('lowPtQuadStepClusters'),
+    useApproxClusters = cms.bool(True),
     doSeedingRegionRebuilding   = True,
     useHitsSplitting            = True
 )

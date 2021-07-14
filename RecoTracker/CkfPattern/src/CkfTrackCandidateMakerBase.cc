@@ -34,6 +34,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iostream>
 
 // #define VI_SORTSEED
 // #define VI_REPRODUCIBLE
@@ -79,16 +80,23 @@ namespace cms {
         maxSeedsBeforeCleaning_(0),
         theMTELabel(iC.consumes<MeasurementTrackerEvent>(conf.getParameter<edm::InputTag>("MeasurementTrackerEvent"))),
         skipClusters_(false),
+        useApproxClusters_(false),
         phase2skipClusters_(false) {
     theSeedLabel = iC.consumes<edm::View<TrajectorySeed>>(conf.getParameter<edm::InputTag>("src"));
 #ifndef VI_REPRODUCIBLE
     if (conf.exists("maxSeedsBeforeCleaning"))
       maxSeedsBeforeCleaning_ = conf.getParameter<unsigned int>("maxSeedsBeforeCleaning");
 #endif
+    if(conf.exists("useApproxClusters")) useApproxClusters_ = conf.getParameter<bool>("useApproxClusters"); 
     if (conf.existsAs<edm::InputTag>("clustersToSkip")) {
       skipClusters_ = true;
       maskPixels_ = iC.consumes<PixelClusterMask>(conf.getParameter<edm::InputTag>("clustersToSkip"));
-      maskStrips_ = iC.consumes<StripClusterMask>(conf.getParameter<edm::InputTag>("clustersToSkip"));
+      std::cout << useApproxClusters_ << "  useApproxClusters" <<  std::endl;
+      if( useApproxClusters_ ){
+        maskApproxStrips_ = iC.consumes<ApproxStripClusterMask>(conf.getParameter<edm::InputTag>("clustersToSkip"));
+      } else {
+        maskStrips_ = iC.consumes<StripClusterMask>(conf.getParameter<edm::InputTag>("clustersToSkip"));
+      }
     }
     //FIXME:: just temporary solution for phase2!
     if (conf.existsAs<edm::InputTag>("phase2clustersToSkip")) {
@@ -164,9 +172,15 @@ namespace cms {
     if (skipClusters_) {
       edm::Handle<PixelClusterMask> pixelMask;
       e.getByToken(maskPixels_, pixelMask);
+      edm::Handle<ApproxStripClusterMask> approxStripMask;
       edm::Handle<StripClusterMask> stripMask;
-      e.getByToken(maskStrips_, stripMask);
-      dataWithMasks = std::make_unique<MeasurementTrackerEvent>(*data, *stripMask, *pixelMask);
+      if(useApproxClusters_){
+        e.getByToken(maskApproxStrips_, approxStripMask);
+        dataWithMasks = std::make_unique<MeasurementTrackerEvent>(*data, *approxStripMask, *pixelMask);
+      } else {
+        e.getByToken(maskStrips_, stripMask);
+        dataWithMasks = std::make_unique<MeasurementTrackerEvent>(*data, *stripMask, *pixelMask);
+      }
       //std::cout << "Trajectory builder " << conf_.getParameter<std::string>("@module_label") << " created with masks " << std::endl;
       theTrajectoryBuilder->setEvent(e, es, &*dataWithMasks);
     } else if (phase2skipClusters_) {

@@ -6,6 +6,7 @@ class StMeasurementDetSet;
 class PxMeasurementDetSet;
 class Phase2OTMeasurementDetSet;
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/TrackerRecHit2D/interface/VectorHit.h"
@@ -47,6 +48,9 @@ public:
                           const edm::ContainerMask<edmNew::DetSetVector<SiStripCluster> > &stripClustersToSkip,
                           const edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster> > &pixelClustersToSkip);
 
+  MeasurementTrackerEvent(const MeasurementTrackerEvent &trackerEvent,
+                          const edm::ContainerMask<edmNew::DetSetVector<SiStripApproximateCluster> > &approxStripClustersToSkip,
+                          const edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster> > &pixelClustersToSkip);
   //FIXME:just temporary solution for phase2!
   MeasurementTrackerEvent(
       const MeasurementTrackerEvent &trackerEvent,

@@ -41,6 +41,7 @@ MeasurementTrackerEventProducer::MeasurementTrackerEventProducer(const edm::Para
   LogDebug("MeasurementTracker") << "skipping clusters: " << selfUpdateSkipClusters_;
   isPhase2_ = false;
   useVectorHits_ = false;
+  useApproxStripClusters_ = false;
 
   if (!iConfig.getParameter<std::string>("stripClusterProducer").empty()) {
     theStripClusterLabel = consumes<edmNew::DetSetVector<SiStripCluster>>(
@@ -48,6 +49,14 @@ MeasurementTrackerEventProducer::MeasurementTrackerEventProducer(const edm::Para
     if (selfUpdateSkipClusters_)
       theStripClusterMask = consumes<edm::ContainerMask<edmNew::DetSetVector<SiStripCluster>>>(
           iConfig.getParameter<edm::InputTag>("skipClusters"));
+  }
+  if (iConfig.getParameter<std::string>("stripClusterProducer").empty() && !iConfig.getParameter<std::string>("stripApproxClusterProducer").empty()) {
+    theApproxStripClusterLabel = consumes<edmNew::DetSetVector<SiStripApproximateCluster>>(
+        edm::InputTag(iConfig.getParameter<std::string>("stripApproxClusterProducer")));
+    if (selfUpdateSkipClusters_)
+      theApproxStripClusterMask = consumes<edm::ContainerMask<edmNew::DetSetVector<SiStripApproximateCluster>>>(
+          iConfig.getParameter<edm::InputTag>("skipClusters"));
+    useApproxStripClusters_ = true; 
   }
   if (!iConfig.getParameter<std::string>("pixelClusterProducer").empty()) {
     thePixelClusterLabel = consumes<edmNew::DetSetVector<SiPixelCluster>>(
@@ -79,6 +88,7 @@ void MeasurementTrackerEventProducer::fillDescriptions(edm::ConfigurationDescrip
   desc.add<edm::InputTag>("skipClusters", edm::InputTag());
   desc.add<std::string>("pixelClusterProducer", "siPixelClusters");
   desc.add<std::string>("stripClusterProducer", "siStripClusters");
+  desc.add<std::string>("stripApproxClusterProducer", "");
   desc.add<std::string>("Phase2TrackerCluster1DProducer", "");
   desc.add<edm::InputTag>("vectorHits", edm::InputTag(""));
   desc.add<edm::InputTag>("vectorHitsRej", edm::InputTag(""));
@@ -302,7 +312,7 @@ void MeasurementTrackerEventProducer::updateStrips(const edm::Event& event,
   //first clear all of them
   theStDets.setEmpty();
 
-  if (theStripClusterLabel.isUninitialized())
+  if (theStripClusterLabel.isUninitialized() && theApproxStripClusterLabel.isUninitialized())
     return;  //clusters have not been produced
 
   const int endDet = theStDets.size();
@@ -322,44 +332,89 @@ void MeasurementTrackerEventProducer::updateStrips(const edm::Event& event,
   //=========  actually load cluster =============
   {
     edm::Handle<edmNew::DetSetVector<SiStripCluster>> clusterHandle;
-    if (event.getByToken(theStripClusterLabel, clusterHandle)) {
-      const edmNew::DetSetVector<SiStripCluster>* clusterCollection = clusterHandle.product();
+    edm::Handle<edmNew::DetSetVector<SiStripApproximateCluster>> approxClusterHandle;
+    if(!useApproxStripClusters_){
+      if (event.getByToken(theStripClusterLabel, clusterHandle)) {
+        const edmNew::DetSetVector<SiStripCluster>* clusterCollection = clusterHandle.product();
 
-      if (selfUpdateSkipClusters_) {
-        edm::Handle<edm::ContainerMask<edmNew::DetSetVector<SiStripCluster>>> stripClusterMask;
-        //and get the collection of pixel ref to skip
-        LogDebug("MeasurementTracker") << "getting strp refs to skip";
-        event.getByToken(theStripClusterMask, stripClusterMask);
-        if (stripClusterMask.failedToGet())
-          edm::LogError("MeasurementTracker") << "not getting the strip clusters to skip";
-        if (stripClusterMask->refProd().id() != clusterHandle.id()) {
-          edm::LogError("ProductIdMismatch")
-              << "The strip masking does not point to the proper collection of clusters: "
-              << stripClusterMask->refProd().id() << "!=" << clusterHandle.id();
-        }
-        stripClusterMask->copyMaskTo(stripClustersToSkip);
-      }
-
-      theStDets.handle() = clusterHandle;
-      int i = 0;
-      // cluster and det and in order (both) and unique so let's use set intersection
-      for (auto j = 0U; j < (*clusterCollection).size(); ++j) {
-        unsigned int id = (*clusterCollection).id(j);
-        while (id != theStDets.id(i)) {  // eventually change to lower_bound
-          ++i;
-          if (endDet == i)
-            throw "we have a problem in strips!!!!";
+        if (selfUpdateSkipClusters_) {
+          edm::Handle<edm::ContainerMask<edmNew::DetSetVector<SiStripCluster>>> stripClusterMask;
+          //and get the collection of pixel ref to skip
+          LogDebug("MeasurementTracker") << "getting strp refs to skip";
+          event.getByToken(theStripClusterMask, stripClusterMask);
+          if (stripClusterMask.failedToGet())
+            edm::LogError("MeasurementTracker") << "not getting the strip clusters to skip";
+          if (stripClusterMask->refProd().id() != clusterHandle.id()) {
+            edm::LogError("ProductIdMismatch")
+                << "The strip masking does not point to the proper collection of clusters: "
+                << stripClusterMask->refProd().id() << "!=" << clusterHandle.id();
+          }
+          stripClusterMask->copyMaskTo(stripClustersToSkip);
         }
 
-        // push cluster range in det
-        if (theStDets.isActive(i))
-          theStDets.update(i, j);
+        theStDets.handle() = clusterHandle;
+        int i = 0;
+        // cluster and det and in order (both) and unique so let's use set intersection
+        for (auto j = 0U; j < (*clusterCollection).size(); ++j) {
+          unsigned int id = (*clusterCollection).id(j);
+          while (id != theStDets.id(i)) {  // eventually change to lower_bound
+            ++i;
+            if (endDet == i)
+              throw "we have a problem in strips!!!!";
+          }
+
+          // push cluster range in det
+          if (theStDets.isActive(i))
+            theStDets.update(i, j);
+        }
+      } else {
+        edm::EDConsumerBase::Labels labels;
+        labelsForToken(theStripClusterLabel, labels);
+        edm::LogWarning("MeasurementTrackerEventProducer")
+            << "input strip cluster collection " << labels.module << " is not valid";
       }
-    } else {
-      edm::EDConsumerBase::Labels labels;
-      labelsForToken(theStripClusterLabel, labels);
-      edm::LogWarning("MeasurementTrackerEventProducer")
-          << "input strip cluster collection " << labels.module << " is not valid";
+    }
+    else{
+    //approximate cluster version
+      if( event.getByToken(theApproxStripClusterLabel, approxClusterHandle) ){
+        const edmNew::DetSetVector<SiStripApproximateCluster>* clusterCollection = approxClusterHandle.product();
+  
+        if (selfUpdateSkipClusters_) {
+          edm::Handle<edm::ContainerMask<edmNew::DetSetVector<SiStripApproximateCluster>>> stripClusterMask;
+          //and get the collection of pixel ref to skip
+          LogDebug("MeasurementTracker") << "getting strp refs to skip";
+          event.getByToken(theApproxStripClusterMask, stripClusterMask);
+          if (stripClusterMask.failedToGet())
+            edm::LogError("MeasurementTracker") << "not getting the approximate strip clusters to skip";
+          if (stripClusterMask->refProd().id() != approxClusterHandle.id()) {
+            edm::LogError("ProductIdMismatch")
+                << "The strip masking does not point to the proper collection of approximate clusters: "
+                << stripClusterMask->refProd().id() << "!=" << approxClusterHandle.id();
+          }
+          stripClusterMask->copyMaskTo(stripClustersToSkip);
+        }
+  
+        theStDets.handle() = approxClusterHandle;
+        int i = 0;
+        // cluster and det and in order (both) and unique so let's use set intersection
+        for (auto j = 0U; j < (*clusterCollection).size(); ++j) {
+          unsigned int id = (*clusterCollection).id(j);
+          while (id != theStDets.id(i)) {  // eventually change to lower_bound
+            ++i;
+            if (endDet == i)
+              throw "we have a problem in strips!!!!";
+          }
+  
+          // push cluster range in det
+          if (theStDets.isActive(i))
+            theStDets.update(i, j);
+        }
+      } else {
+        edm::EDConsumerBase::Labels labels;
+        labelsForToken(theApproxStripClusterLabel, labels);
+        edm::LogWarning("MeasurementTrackerEventProducer")
+            << "input approx strip cluster collection " << labels.module << " is not valid";
+      }
     }
   }
 }

@@ -4,6 +4,7 @@
 #include "DataFormats/Common/interface/RefCoreWithIndex.h"
 
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
@@ -24,6 +25,7 @@ class OmniClusterRef {
 public:
   typedef edm::Ref<edmNew::DetSetVector<SiPixelCluster>, SiPixelCluster> ClusterPixelRef;
   typedef edm::Ref<edmNew::DetSetVector<SiStripCluster>, SiStripCluster> ClusterStripRef;
+  typedef edm::Ref<edmNew::DetSetVector<SiStripApproximateCluster>,SiStripApproximateCluster > ApproximateClusterStripRef;
   typedef edm::Ref<edmNew::DetSetVector<Phase2TrackerCluster1D>, Phase2TrackerCluster1D> Phase2Cluster1DRef;
   typedef edm::Ref<FTLClusterCollection, FTLCluster> ClusterMTDRef;
 
@@ -32,6 +34,8 @@ public:
       : me(ref.refCore(), (ref.isNonnull() ? ref.key() | (subClus << subClusShift) : kInvalid)) {}
   explicit OmniClusterRef(ClusterStripRef const& ref, unsigned int subClus = 0)
       : me(ref.refCore(), (ref.isNonnull() ? (ref.key() | kIsStrip) | (subClus << subClusShift) : kInvalid)) {}
+  explicit OmniClusterRef(ApproximateClusterStripRef const & ref, unsigned int subClus=0) 
+      : me(ref.refCore(), (ref.isNonnull() ? (ref.key() | kIsStrip ) | (subClus << subClusShift) : kInvalid)){}
   explicit OmniClusterRef(Phase2Cluster1DRef const& ref, unsigned int subClus = 0)
       : me(ref.refCore(), (ref.isNonnull() ? (ref.key() | kIsPhase2) | (subClus << subClusShift) : kInvalid)) {}
   explicit OmniClusterRef(ClusterMTDRef const& ref)
@@ -43,6 +47,10 @@ public:
 
   ClusterStripRef cluster_strip() const {
     return isStrip() ? ClusterStripRef(me.toRefCore(), index()) : ClusterStripRef();
+  }
+
+  SiStripApproximateCluster const & approxStripCluster() const {
+    return *ApproximateClusterStripRef(me.toRefCore(),index());
   }
 
   Phase2Cluster1DRef cluster_phase2OT() const {

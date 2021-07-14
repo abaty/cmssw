@@ -40,11 +40,13 @@ protected:
   std::string measurementTrackerLabel_;
   edm::EDGetTokenT<edmNew::DetSetVector<SiPixelCluster>> thePixelClusterLabel;
   edm::EDGetTokenT<edmNew::DetSetVector<SiStripCluster>> theStripClusterLabel;
+  edm::EDGetTokenT<edmNew::DetSetVector<SiStripApproximateCluster>> theApproxStripClusterLabel;
   edm::EDGetTokenT<edmNew::DetSetVector<Phase2TrackerCluster1D>> thePh2OTClusterLabel;
   edm::EDGetTokenT<VectorHitCollection> thePh2OTVectorHitsLabel;
   edm::EDGetTokenT<VectorHitCollection> thePh2OTVectorHitsRejLabel;
   edm::EDGetTokenT<edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster>>> thePixelClusterMask;
   edm::EDGetTokenT<edm::ContainerMask<edmNew::DetSetVector<SiStripCluster>>> theStripClusterMask;
+  edm::EDGetTokenT<edm::ContainerMask<edmNew::DetSetVector<SiStripApproximateCluster>>> theApproxStripClusterMask;
 
   std::vector<edm::EDGetTokenT<DetIdCollection>> theInactivePixelDetectorLabels;
   std::vector<edm::EDGetTokenT<PixelFEDChannelCollection>> theBadPixelFEDChannelsLabels;
@@ -54,6 +56,7 @@ protected:
   bool selfUpdateSkipClusters_;
   bool switchOffPixelsIfEmpty_;
   bool isPhase2_;
+  bool useApproxStripClusters_;
   bool useVectorHits_;
 };
 

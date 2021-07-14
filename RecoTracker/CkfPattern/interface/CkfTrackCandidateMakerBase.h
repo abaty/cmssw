@@ -74,12 +74,15 @@ namespace cms {
     edm::EDGetTokenT<MeasurementTrackerEvent> theMTELabel;
 
     bool skipClusters_;
+    bool useApproxClusters_;
     bool phase2skipClusters_;
     typedef edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster> > PixelClusterMask;
     typedef edm::ContainerMask<edmNew::DetSetVector<SiStripCluster> > StripClusterMask;
+    typedef edm::ContainerMask<edmNew::DetSetVector<SiStripApproximateCluster> > ApproxStripClusterMask;
     typedef edm::ContainerMask<edmNew::DetSetVector<Phase2TrackerCluster1D> > Phase2OTClusterMask;
     edm::EDGetTokenT<PixelClusterMask> maskPixels_;
     edm::EDGetTokenT<StripClusterMask> maskStrips_;
+    edm::EDGetTokenT<ApproxStripClusterMask> maskApproxStrips_;
     edm::EDGetTokenT<Phase2OTClusterMask> maskPhase2OTs_;
 
     // methods for debugging

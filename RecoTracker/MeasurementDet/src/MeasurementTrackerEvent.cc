@@ -74,6 +74,44 @@ MeasurementTrackerEvent::MeasurementTrackerEvent(
   pixelClustersToSkip.copyMaskTo(thePixelClustersToSkip);
 }
 
+
+MeasurementTrackerEvent::MeasurementTrackerEvent(
+    const MeasurementTrackerEvent &trackerEvent,
+    const edm::ContainerMask<edmNew::DetSetVector<SiStripApproximateCluster> > &approxStripClustersToSkip,
+    const edm::ContainerMask<edmNew::DetSetVector<SiPixelCluster> > &pixelClustersToSkip)
+    : theTracker(trackerEvent.theTracker),
+      theStripData(trackerEvent.theStripData),
+      thePixelData(trackerEvent.thePixelData),
+      thePhase2OTData(nullptr),
+      thePhase2OTVectorHits(nullptr),
+      thePhase2OTVectorHitsRej(nullptr),
+      theOwner(false) {
+  //std::cout << "Creatign non-owned MT @ " << this << " from @ " << & trackerEvent << " (strip data @ " << trackerEvent.theStripData << ")" << std::endl;
+  std::cout << "here" << approxStripClustersToSkip.refProd().id() << " " << theStripData->handle().id() << std::endl;
+  if (approxStripClustersToSkip.refProd().id() != theStripData->handle().id()) {
+    edm::LogError("ProductIdMismatch") << "The strip masking does not point to the strip collection of clusters: "
+                                       << approxStripClustersToSkip.refProd().id() << "!=" << theStripData->handle().id();
+    throw cms::Exception("Configuration")
+        << "The strip masking does not point to the strip collection of clusters: "
+        << approxStripClustersToSkip.refProd().id() << "!=" << theStripData->handle().id() << "\n";
+  }
+  std::cout << "here2" << std::endl;
+
+  if (pixelClustersToSkip.refProd().id() != thePixelData->handle().id()) {
+    edm::LogError("ProductIdMismatch") << "The pixel masking does not point to the proper collection of clusters: "
+                                       << pixelClustersToSkip.refProd().id() << "!=" << thePixelData->handle().id();
+    throw cms::Exception("Configuration")
+        << "The pixel masking does not point to the proper collection of clusters: "
+        << pixelClustersToSkip.refProd().id() << "!=" << thePixelData->handle().id() << "\n";
+  }
+
+  theStripClustersToSkip.resize(approxStripClustersToSkip.size());
+  approxStripClustersToSkip.copyMaskTo(theStripClustersToSkip);
+
+  thePixelClustersToSkip.resize(pixelClustersToSkip.size());
+  pixelClustersToSkip.copyMaskTo(thePixelClustersToSkip);
+}
+
 //FIXME:just temporary solution for phase2!
 MeasurementTrackerEvent::MeasurementTrackerEvent(
     const MeasurementTrackerEvent &trackerEvent,

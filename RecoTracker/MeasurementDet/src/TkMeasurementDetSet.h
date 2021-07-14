@@ -12,6 +12,7 @@ class Phase2StripCPE;
 
 #include "DataFormats/Common/interface/DetSetVectorNew.h"
 #include "DataFormats/SiStripCluster/interface/SiStripCluster.h"
+#include "DataFormats/SiStripApproximateCluster/interface/SiStripApproximateCluster.h"
 #include "DataFormats/SiPixelCluster/interface/SiPixelCluster.h"
 #include "DataFormats/Phase2TrackerCluster/interface/Phase2TrackerCluster1D.h"
 #include "RecoLocalTracker/Phase2TrackerRecHits/interface/Phase2StripCPE.h"
@@ -139,6 +140,9 @@ class StMeasurementDetSet {
 public:
   typedef edmNew::DetSet<SiStripCluster> StripDetset;
   typedef StripDetset::const_iterator new_const_iterator;
+  
+  typedef edmNew::DetSet<SiStripApproximateCluster> approxStripDetset;
+  typedef approxStripDetset::const_iterator new_const_iterator_approx;
 
   StMeasurementDetSet(const StMeasurementConditionSet& cond)
       : conditionSet_(&cond),

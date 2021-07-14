@@ -2,6 +2,7 @@
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 #include "Geometry/CommonTopologies/interface/TkRadialStripTopology.h"
 #include "Geometry/TrackerGeometryBuilder/interface/StripGeomDetType.h"
+#include "DataFormats/SiStripCluster/interface/SiStripApproximateCluster.h"
 #include <algorithm>
 #include <cmath>
 #include <cassert>
@@ -67,6 +68,17 @@ StripClusterParameterEstimator::LocalValues StripCPE::localParameters(const SiSt
       p.coveredStrips(p.drift + LocalVector(0, 0, -p.thickness), p.topology->localPosition(barycenter));
   const float strip = barycenter - 0.5f * (1.f - p.backplanecorrection) * fullProjection;
 
+  return std::make_pair(p.topology->localPosition(strip), p.topology->localError(strip, 1.f / 12.f));
+}
+
+StripClusterParameterEstimator::LocalValues StripCPE::approxlocalParameters(const SiStripApproximateCluster& cluster,
+                                                                            const GeomDetUnit& det) const {
+  StripCPE::Param const& p = param(det);
+  const float barycenter = cluster.barycenter();
+  const float fullProjection =
+      p.coveredStrips(p.drift + LocalVector(0, 0, -p.thickness), p.topology->localPosition(barycenter));
+  const float strip = barycenter - 0.5f * (1.f - p.backplanecorrection) * fullProjection;
+ 
   return std::make_pair(p.topology->localPosition(strip), p.topology->localError(strip, 1.f / 12.f));
 }
 

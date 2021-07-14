@@ -127,3 +127,39 @@ StripClusterParameterEstimator::LocalValues StripCPEfromTrackAngle::localParamet
   auto const& par = getAlgoParam(det, ltp);
   return localParameters(cluster, par);
 }
+
+StripClusterParameterEstimator::LocalValues StripCPEfromTrackAngle::approxlocalParameters(const SiStripApproximateCluster& cluster,
+                                                                                          AlgoParam const& par) const {
+  auto const& p = par.p;
+  auto const& ltp = par.ltp;
+  auto loc = par.loc;
+  auto corr = par.corr;
+  auto afp = par.afullProjection;
+
+  float uerr2 = 0;
+
+  auto N = cluster.width();
+
+  switch (m_algo) {
+    case Algo::chargeCK: {
+      uerr2 = stripErrorSquared( N, afp,loc ); 
+    } break;
+    case Algo::legacy:
+      uerr2 = legacyStripErrorSquared(N, afp);
+      break;
+    case Algo::mergeCK:
+      uerr2 = stripErrorSquared( N, afp,loc );
+      break;
+  }
+
+  const float strip = cluster.barycenter() + corr;
+
+  return std::make_pair(p.topology->localPosition(strip, ltp.vector()),
+                        p.topology->localError(strip, uerr2, ltp.vector()));
+}
+
+StripClusterParameterEstimator::LocalValues StripCPEfromTrackAngle::approxlocalParameters(
+    const SiStripApproximateCluster& cluster, const GeomDetUnit& det, const LocalTrajectoryParameters& ltp) const {
+  auto const& par = getAlgoParam(det, ltp);
+  return approxlocalParameters(cluster, par);
+}

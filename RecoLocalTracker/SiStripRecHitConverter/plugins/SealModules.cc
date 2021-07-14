@@ -1,4 +1,5 @@
 #include "RecoLocalTracker/SiStripRecHitConverter/plugins/SiStripRecHitConverter.h"
+#include "RecoLocalTracker/SiStripRecHitConverter/plugins/ApproxSiStripRecHitConverter.h"
 #include "RecoLocalTracker/SiStripRecHitConverter/plugins/SiStripRecHitMatcherESProducer.h"
 
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -7,3 +8,4 @@
 
 DEFINE_FWK_EVENTSETUP_MODULE(SiStripRecHitMatcherESProducer);
 DEFINE_FWK_MODULE(SiStripRecHitConverter);
+DEFINE_FWK_MODULE(ApproxSiStripRecHitConverter);

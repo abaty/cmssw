@@ -31,6 +31,7 @@
  <class name="edm::Wrapper<edmNew::DetSetVector<SiStripApproximateCluster>>"/>
  
  <class name="std::vector<SiStripApproximateCluster>"/>
+ <class name="edm::RefProd<edmNew::DetSetVector<SiStripApproximateCluster> >"/>
 
  <class name="edm::Ref<edmNew::DetSetVector<SiStripApproximateCluster>, SiStripApproximateCluster, edmNew::DetSetVector<SiStripApproximateCluster>::FindForDetSetVector>"/>
 
